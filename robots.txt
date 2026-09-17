@@ -1,0 +1,3 @@
+# Cette application n'a pas vocation a etre indexee.
+User-agent: *
+Disallow: /

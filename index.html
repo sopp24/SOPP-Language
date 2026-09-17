@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="description" content="">
+<meta name="theme-color" content="#0F1A20">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SOPP Language">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>SOPP Language</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: dark light;
+  --bg:#0F1A20; --bg-raise:#16252D; --bg-sink:#0A1218;
+  --line:#22343E; --line-soft:#1A2A33;
+  --text:#EAF1F3; --text-dim:#8AA0AC; --text-faint:#5D727E;
+  --them:#7FD4E8; --them-bg:#0F2A34;
+  --me:#F0B44A; --me-bg:#2B2113;
+  --live:#F2604B; --ok:#6FCF97;
+  --r:14px; --pad:16px;
+  --font:'Archivo','Hiragino Sans','Noto Sans JP','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans Devanagari','Nirmala UI',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#EEF2F3; --bg-raise:#FFFFFF; --bg-sink:#E1E8EA; --line:#C7D3D8; --line-soft:#D8E1E4;
+    --text:#0E1D24; --text-dim:#4E6672; --text-faint:#7B909B;
+    --them:#0E6C86; --them-bg:#DCEFF5; --me:#8A5A08; --me-bg:#FBEECF; --live:#C2352A;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#EEF2F3; --bg-raise:#FFFFFF; --bg-sink:#E1E8EA; --line:#C7D3D8; --line-soft:#D8E1E4;
+  --text:#0E1D24; --text-dim:#4E6672; --text-faint:#7B909B;
+  --them:#0E6C86; --them-bg:#DCEFF5; --me:#8A5A08; --me-bg:#FBEECF; --live:#C2352A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.45;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--them);outline-offset:2px}
+::selection{background:var(--them);color:var(--bg-sink)}
+
+#app{display:flex;flex-direction:column;height:100dvh;max-width:820px;margin:0 auto;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+
+header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bottom:1px solid var(--line-soft);background:var(--bg);flex:none}
+#pairBtn{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;margin-left:-10px}
+#pairBtn:hover{background:var(--bg-raise)}
+.pair-code{font-size:18px;font-weight:600}
+.pair-them{color:var(--them)} .pair-me{color:var(--me)}
+.pair-arrow{color:var(--text-faint);font-size:14px}
+.pair-caret{color:var(--text-faint);font-size:10px}
+#hdrStatus{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-dim);text-align:right}
+#dot{width:8px;height:8px;border-radius:50%;background:var(--text-faint);flex:none}
+#dot.on{background:var(--live);animation:pulse 1.4s ease-in-out infinite}
+#dot.busy{background:var(--them)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+@media (prefers-reduced-motion:reduce){#dot.on{animation:none}}
+
+#modes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px var(--pad);background:var(--bg);flex:none}
+.mode{padding:8px 4px;border-radius:10px;border:1px solid var(--line);font-size:13px;color:var(--text-dim);text-align:center;line-height:1.2}
+.mode[aria-pressed="true"]{border-color:var(--them);color:var(--them);background:color-mix(in srgb,var(--them) 10%,transparent)}
+.mode small{display:block;font-size:10.5px;color:var(--text-faint);margin-top:2px}
+.mode[aria-pressed="true"] small{color:color-mix(in srgb,var(--them) 70%,var(--text-faint))}
+
+#banner{display:none;padding:11px var(--pad);background:var(--bg-raise);border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px;color:var(--text-dim);line-height:1.45;flex:none}
+#banner.show{display:block}
+#banner b{color:var(--text);font-weight:600}
+#banner .bx{float:right;color:var(--text-faint);padding:0 0 6px 10px;font-size:15px}
+
+#feed{flex:1;overflow-y:auto;padding:14px var(--pad) 6px;display:flex;flex-direction:column;gap:13px;-webkit-overflow-scrolling:touch}
+#feed.bullets{gap:0}
+.intro{margin:auto 0;padding:6px 0 34px;color:var(--text-dim);font-size:15px;line-height:1.6}
+.intro h2{font-size:21px;font-weight:600;color:var(--text);margin:0 0 9px;letter-spacing:-.015em}
+.intro ol,.intro ul{margin:0;padding-left:1.15em}.intro li{margin-bottom:6px}
+.intro .hint{margin-top:16px;font-size:13.5px;color:var(--text-faint)}
+.intro b{color:var(--text)}
+
+.turn{display:flex;flex-direction:column;gap:5px;max-width:92%}
+.turn.them{align-self:flex-start}
+.turn.me{align-self:flex-end;align-items:flex-end}
+.tmeta{font-size:12px;color:var(--text-faint);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.turn.them .tmeta strong{color:var(--them)}
+.turn.me .tmeta strong{color:var(--me)}
+.tmeta strong{font-weight:600}
+.bubble{border-radius:var(--r);padding:11px 14px;border:1px solid transparent;cursor:pointer}
+.turn.them .bubble{background:var(--them-bg);border-color:color-mix(in srgb,var(--them) 22%,transparent)}
+.turn.me .bubble{background:var(--me-bg);border-color:color-mix(in srgb,var(--me) 22%,transparent);text-align:right}
+.trans{font-size:21px;line-height:1.35;font-weight:500;word-wrap:break-word;overflow-wrap:anywhere}
+.turn.them .trans{font-size:24px;line-height:1.3}
+.src{font-size:14px;color:var(--text-dim);margin-top:7px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--text) 12%,transparent);word-wrap:break-word;overflow-wrap:anywhere}
+.waiting{color:var(--text-faint);font-style:italic;font-size:17px;font-weight:400}
+.err{color:var(--live);font-size:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.err button{text-decoration:underline;color:var(--text)}
+
+.blockhead{font-size:12px;color:var(--text-faint);margin:16px 0 6px;display:flex;align-items:center;gap:8px}
+.blockhead::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.blockhead:first-child{margin-top:0}
+.bullet{display:flex;gap:10px;padding:7px 0;font-size:17px;line-height:1.4;align-items:flex-start}
+.bullet::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--them);margin-top:9px;flex:none}
+.bullet.pending{color:var(--text-faint);font-style:italic}
+.bullet.pending::before{background:var(--text-faint)}
+
+#live{display:none;padding:8px var(--pad);border-top:1px solid var(--line-soft);background:var(--bg-sink);font-size:15px;color:var(--text-dim);line-height:1.35;flex:none}
+#live.show{display:block}
+#live .txt span{color:var(--text)}
+#meter{display:none;height:4px;border-radius:2px;background:var(--line);margin-top:7px;position:relative;overflow:hidden}
+#meter.show{display:block}
+#meterFill{position:absolute;inset:0 100% 0 0;background:var(--text-faint);transition:right .07s linear}
+#meterFill.open{background:var(--ok)}
+#meterMark{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--live);left:50%}
+
+footer{padding:9px var(--pad) 13px;border-top:1px solid var(--line-soft);background:var(--bg);flex:none}
+.quickbar{display:flex;gap:6px;margin-bottom:9px;overflow-x:auto;scrollbar-width:none}
+.quickbar::-webkit-scrollbar{display:none}
+
+.channels.texte-hidden{display:none}
+#textBar{display:none;flex-direction:column;gap:9px}
+#textBar.show{display:flex}
+.trow{border-radius:var(--r);border:1.5px solid var(--line);background:var(--bg-raise);padding:9px 11px 8px}
+.trow-them{border-color:color-mix(in srgb,var(--them) 38%,var(--line))}
+.trow-me{border-color:color-mix(in srgb,var(--me) 38%,var(--line))}
+.trole{font-size:12.5px;color:var(--text-dim);display:block;margin-bottom:5px}
+.trow-them .trole{color:var(--them)}
+.trow-me .trole{color:var(--me)}
+.tinput{display:flex;align-items:flex-end;gap:8px}
+.tinput textarea{flex:1;min-height:40px;max-height:120px;resize:none;border:none;background:none;padding:7px 0;font-size:16px;line-height:1.35;color:var(--text);font-family:inherit}
+.tinput textarea:focus{outline:none}
+.tinput textarea::placeholder{color:var(--text-faint)}
+.tinput button{flex:none;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;background:var(--them);color:var(--bg-sink)}
+.trow-me .tinput button{background:var(--me)}
+.tinput button:disabled{opacity:.35}
+.qb{flex:none;padding:6px 11px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:var(--text-dim);white-space:nowrap}
+.qb[aria-pressed="true"]{border-color:var(--them);color:var(--them);background:color-mix(in srgb,var(--them) 10%,transparent)}
+.qb.warn{border-color:var(--live);color:var(--live)}
+.channels{display:grid;gap:9px}
+.channels.two{grid-template-columns:1fr 1fr}
+.ch{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:13px 14px 11px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--bg-raise);min-height:82px}
+.channels:not(.two) .ch{min-height:68px}
+.ch-role{font-size:13px;color:var(--text-dim)}
+.ch-lang{font-size:25px;font-weight:600;line-height:1.05}
+.ch-state{font-size:12.5px;color:var(--text-faint);margin-top:auto}
+.ch-them .ch-lang{color:var(--them)} .ch-me .ch-lang{color:var(--me)}
+.ch-them[aria-pressed="true"]{border-color:var(--them);background:var(--them-bg)}
+.ch-me[aria-pressed="true"]{border-color:var(--me);background:var(--me-bg)}
+.ch[aria-pressed="true"] .ch-state{color:var(--text)}
+.ch:disabled{opacity:.4;cursor:not-allowed}
+
+.sheet{position:fixed;inset:0;z-index:20;display:none;background:color-mix(in srgb,var(--bg-sink) 84%,transparent)}
+.sheet.show{display:flex;align-items:flex-end;justify-content:center}
+.sheet-inner{background:var(--bg);width:100%;max-width:820px;max-height:92dvh;overflow-y:auto;border-radius:20px 20px 0 0;border:1px solid var(--line);border-bottom:none;padding:20px var(--pad) calc(24px + env(safe-area-inset-bottom))}
+@media (min-width:760px){.sheet.show{align-items:center}.sheet-inner{border-radius:20px;border-bottom:1px solid var(--line);margin:20px}}
+.sheet h2{font-size:20px;font-weight:600;margin:0 0 4px}
+.sheet p.sub{margin:0 0 18px;color:var(--text-dim);font-size:14px;line-height:1.5}
+.grp{margin:22px 0 4px;font-size:13px;color:var(--them);font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--line-soft)}
+.grp:first-of-type{margin-top:4px}
+.field{margin:14px 0}
+.field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:6px}
+select,input[type=text],input[type=password],textarea{width:100%;padding:11px;border-radius:10px;background:var(--bg-raise);border:1px solid var(--line);color:var(--text);font-size:16px;font-family:inherit}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text-faint) 50%),linear-gradient(135deg,var(--text-faint) 50%,transparent 50%);background-position:calc(100% - 18px) 20px,calc(100% - 13px) 20px;background-size:5px 5px;background-repeat:no-repeat}
+textarea{min-height:88px;resize:vertical;line-height:1.5;font-size:15px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.row:last-child{border-bottom:none}
+.row .lab{font-size:15px}
+.row .desc{font-size:12.5px;color:var(--text-faint);margin-top:2px;line-height:1.4}
+.toggle{width:50px;height:29px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:var(--text);transition:transform .15s}
+.toggle[aria-pressed="true"]{background:var(--them)}
+.toggle[aria-pressed="true"]::after{transform:translateX(21px);background:var(--bg-sink)}
+input[type=range]{width:120px;accent-color:var(--them);flex:none}
+.btn{display:block;width:100%;padding:13px;border-radius:12px;font-size:16px;font-weight:600;text-align:center;background:var(--them);color:var(--bg-sink);margin-top:16px}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--text);font-weight:500;margin-top:9px}
+.btn:disabled{opacity:.45}
+.note{font-size:13px;color:var(--text-faint);line-height:1.55;margin-top:12px}
+.note.warn{color:var(--live)}
+.note.good{color:var(--ok)}
+.note code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+
+#big{position:fixed;inset:0;z-index:30;display:none;background:var(--bg);padding:24px;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:22px}
+#big.show{display:flex}
+#bigText{font-size:clamp(28px,7vw,56px);line-height:1.22;font-weight:600;max-width:20ch;overflow-wrap:anywhere}
+#bigSrc{font-size:16px;color:var(--text-dim);max-width:40ch}
+#big .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#big .acts button{padding:12px 20px;border-radius:12px;border:1px solid var(--line);font-size:15px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <button id="pairBtn" aria-label="Changer les langues">
+      <span class="pair-code pair-them" id="pairThem">EN</span>
+      <span class="pair-arrow">⇄</span>
+      <span class="pair-code pair-me" id="pairMe">FR</span>
+      <span class="pair-caret">▾</span>
+    </button>
+    <div id="hdrStatus"><span id="dot"></span><span id="statusTxt">Prêt</span></div>
+  </header>
+
+  <div id="modes">
+    <button class="mode" id="mConv" aria-pressed="true">Conversation<small>téléphone entre vous</small></button>
+    <button class="mode" id="mEar" aria-pressed="false">Oreillette<small>un appareil chacun</small></button>
+    <button class="mode" id="mConf" aria-pressed="false">Conférence<small>notes en puces</small></button>
+    <button class="mode" id="mTexte" aria-pressed="false">Texte<small>au clavier</small></button>
+  </div>
+
+  <div id="banner"></div>
+  <div id="feed"></div>
+
+  <div id="live">
+    <div class="txt" id="liveTxt"></div>
+    <div id="meter"><div id="meterFill"></div><div id="meterMark"></div></div>
+  </div>
+
+  <footer>
+    <div class="quickbar" id="quickbar"></div>
+    <div class="channels two" id="channels">
+      <button class="ch ch-them" id="chThem" aria-pressed="false">
+        <span class="ch-role" id="chThemRole">Interlocuteur</span>
+        <span class="ch-lang" id="chThemLang">EN</span>
+        <span class="ch-state" id="chThemState">Appuyer pour écouter</span>
+      </button>
+      <button class="ch ch-me" id="chMe" aria-pressed="false">
+        <span class="ch-role">Moi</span>
+        <span class="ch-lang" id="chMeLang">FR</span>
+        <span class="ch-state" id="chMeState">Appuyer pour parler</span>
+      </button>
+    </div>
+    <div id="textBar">
+      <div class="trow trow-them">
+        <span class="trole">Interlocuteur · <span id="tLangThem">EN</span></span>
+        <div class="tinput">
+          <textarea id="taThem" rows="1" maxlength="4000" enterkeyhint="send" placeholder="Écrire…"></textarea>
+          <button id="sendThem" aria-label="Traduire">➜</button>
+        </div>
+      </div>
+      <div class="trow trow-me">
+        <span class="trole">Moi · <span id="tLangMe">FR</span></span>
+        <div class="tinput">
+          <textarea id="taMe" rows="1" maxlength="4000" enterkeyhint="send" placeholder="Écrire…"></textarea>
+          <button id="sendMe" aria-label="Traduire">➜</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<div class="sheet" id="sheetLang">
+  <div class="sheet-inner">
+    <h2>Langues</h2>
+    <p class="sub">Le canal « Interlocuteur » écoute sa langue et vous restitue la vôtre. Le canal « Moi » fait l'inverse.</p>
+    <div class="field"><label for="selThem">Langue de l'interlocuteur</label><select id="selThem"></select></div>
+    <div class="field"><label for="selMe">Ma langue</label><select id="selMe"></select></div>
+    <div id="voiceCheck" class="note"></div>
+    <button class="btn" id="langDone">Commencer</button>
+    <button class="btn ghost" id="langSwap">Inverser les deux langues</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheetSet">
+  <div class="sheet-inner">
+    <h2>Réglages</h2>
+    <p class="sub">Tout reste sur cet appareil.</p>
+
+    <div class="grp">Conversation</div>
+    <div class="row">
+      <div><div class="lab">Mains libres</div><div class="desc">Passe à l'autre canal après chaque prise de parole</div></div>
+      <button class="toggle" id="tgHands" aria-pressed="false"></button>
+    </div>
+    <div class="row">
+      <div><div class="lab">Afficher le texte d'origine</div><div class="desc">Sous chaque traduction</div></div>
+      <button class="toggle" id="tgSrc" aria-pressed="true"></button>
+    </div>
+    <div class="field">
+      <label for="txtContext">Contexte du rendez-vous</label>
+      <textarea id="txtContext" placeholder="Ex. : réunion de maintenance sur un Airbus A320, on parle du circuit hydraulique vert."></textarea>
+      <div class="note">Deux lignes suffisent. C'est ce qui améliore le plus la justesse des traductions.</div>
+    </div>
+
+    <div class="grp">Voix et intonation</div>
+    <div class="row">
+      <div><div class="lab">Lecture à voix haute</div><div class="desc">Décochez pour un usage silencieux</div></div>
+      <button class="toggle" id="tgVoice" aria-pressed="true"></button>
+    </div>
+    <div class="row">
+      <div><div class="lab">Débit de base</div><div class="desc" id="rateVal">1.0×</div></div>
+      <input type="range" id="rngRate" min="0.7" max="1.6" step="0.05" value="1">
+    </div>
+    <div class="row">
+      <div><div class="lab">Refléter l'intonation</div><div class="desc">Reprend le rythme, l'énergie et la hauteur de la voix d'origine. Demande le micro d'analyse.</div></div>
+      <button class="toggle" id="tgProsody" aria-pressed="false"></button>
+    </div>
+    <div class="row">
+      <div><div class="lab">Intensité du reflet</div><div class="desc" id="prosVal">50 %</div></div>
+      <input type="range" id="rngProsody" min="0" max="1" step="0.05" value="0.5">
+    </div>
+    <div class="field"><label for="selVoiceThem">Voix pour ma langue (ce que j'entends)</label><select id="selVoiceThem"></select></div>
+    <div class="field"><label for="selVoiceMe">Voix pour la langue de l'interlocuteur</label><select id="selVoiceMe"></select></div>
+
+    <div class="grp">Micro et bruit ambiant</div>
+    <div class="row">
+      <div><div class="lab">Filtre voix proche</div><div class="desc">Rejette ce qui est dit trop loin ou trop bas — marché, salle bruyante, conversations voisines</div></div>
+      <button class="toggle" id="tgGate" aria-pressed="false"></button>
+    </div>
+    <div class="row">
+      <div><div class="lab">Sensibilité</div><div class="desc" id="gateVal">12 dB au-dessus du fond</div></div>
+      <input type="range" id="rngGate" min="4" max="26" step="1" value="12">
+    </div>
+    <div class="row">
+      <div><div class="lab">Verrouiller sur une voix</div><div class="desc" id="lockDesc">Aucune voix mémorisée</div></div>
+      <button class="qb" id="btnLock">Capturer</button>
+    </div>
+    <div class="note">Le filtre a besoin d'un accès micro séparé. Sur iPhone, il peut gêner la reconnaissance vocale&nbsp;: si les phrases ne remontent plus, désactivez-le.</div>
+    <button class="btn ghost" id="btnMicTest">Tester le micro</button>
+
+    <div class="grp">Jargon et glossaire</div>
+    <div class="field"><label for="selDomain">Domaine technique</label><select id="selDomain"></select></div>
+    <div class="field">
+      <label for="txtGloss">Glossaire imposé</label>
+      <textarea id="txtGloss" placeholder="une paire par ligne&#10;bleed valve = vanne de prélèvement&#10;stakeholder = partie prenante"></textarea>
+      <div class="note">Ces traductions sont imposées mot pour mot, dans les deux sens.</div>
+    </div>
+
+    <div class="grp">Mode conférence</div>
+    <div class="row">
+      <div><div class="lab">Fréquence des puces</div><div class="desc" id="ivalVal">toutes les 45 s</div></div>
+      <input type="range" id="rngIval" min="20" max="180" step="5" value="45">
+    </div>
+    <div class="row">
+      <div><div class="lab">Puces détaillées</div><div class="desc">Plus de points, plus de détail par point</div></div>
+      <button class="toggle" id="tgDense" aria-pressed="false"></button>
+    </div>
+    <div class="row">
+      <div><div class="lab">Lire les puces à voix haute</div><div class="desc">Désactivé par défaut&nbsp;: lire fatigue moins qu'écouter</div></div>
+      <button class="toggle" id="tgSpeakBullets" aria-pressed="false"></button>
+    </div>
+
+    <div class="grp">Traducteur</div>
+    <div id="backendState" class="note"></div>
+    <div class="field">
+      <label for="selProvider">Moteur de traduction</label>
+      <select id="selProvider"></select>
+    </div>
+    <div class="row">
+      <div><div class="lab">Secours automatique</div><div class="desc">Bascule sur un autre moteur si le principal sature ou refuse</div></div>
+      <button class="toggle" id="tgFallback" aria-pressed="true"></button>
+    </div>
+    <div class="note" id="provCaps"></div>
+
+    <div id="cfgGemini" style="display:none">
+      <div class="field">
+        <label for="inpGKey">Clé Google AI Studio — gratuite, sans carte bancaire</label>
+        <input type="password" id="inpGKey" placeholder="AIza..." autocomplete="off" spellcheck="false">
+        <div class="note">aistudio.google.com → <i>Get API key</i>. Compte Google, rien d'autre.</div>
+      </div>
+      <div class="field"><label for="selGModel">Modèle</label><select id="selGModel"></select></div>
+      <button class="btn ghost" id="btnGModels">Récupérer la liste des modèles</button>
+      <button class="btn ghost" id="btnGTest">Tester la connexion</button>
+      <div class="note warn">Google indique que les contenus envoyés par l'offre gratuite peuvent servir à améliorer ses produits. À éviter pour du médical, du juridique, ou tout ce qui est sous accord de confidentialité.</div>
+    </div>
+
+    <div id="cfgChrome" style="display:none">
+      <div class="note" id="chromeNote"></div>
+      <button class="btn ghost" id="btnChromeTest">Vérifier et télécharger les langues</button>
+    </div>
+
+    <div id="cfgMM" style="display:none">
+      <div class="field">
+        <label for="inpMMail">Adresse e-mail — facultative</label>
+        <input type="text" id="inpMMail" placeholder="vous@exemple.fr" autocomplete="off" spellcheck="false">
+        <div class="note">Sans e-mail&nbsp;: 5 000 caractères par jour. Avec&nbsp;: 50 000. Ni inscription ni vérification, l'adresse sert juste de compteur.</div>
+      </div>
+      <button class="btn ghost" id="btnMMTest">Tester la connexion</button>
+    </div>
+
+    <div id="cfgAnthropic" style="display:none">
+      <div class="field">
+        <label for="selAnthMode">Connexion</label>
+        <select id="selAnthMode">
+          <option value="direct">Ma propre clé, sur cet appareil</option>
+          <option value="relay">Relais partagé — aucune clé à saisir</option>
+        </select>
+        <div class="note" id="anthModeNote"></div>
+      </div>
+
+      <div id="anthDirect">
+        <div class="field">
+          <label for="inpKey">Clé API Anthropic — payante</label>
+          <input type="password" id="inpKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+        </div>
+        <button class="btn ghost" id="btnTestKey">Tester la connexion</button>
+        <div class="note warn">La clé est stockée dans ce navigateur et visible par toute personne ayant accès à l'appareil. Créez une clé dédiée, avec un plafond de dépense mensuel. Elle ne sera pas là sur vos autres appareils — à entrer une fois par appareil, ou passez au relais partagé ci-dessus.</div>
+      </div>
+
+      <div id="anthRelay" style="display:none">
+        <div class="field">
+          <label for="inpRelayUrl">Adresse du relais</label>
+          <input type="text" id="inpRelayUrl" placeholder="https://votre-relais.xxx.workers.dev" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="inpRelaySecret">Mot de passe du relais — facultatif</label>
+          <input type="password" id="inpRelaySecret" placeholder="laisser vide si non défini" autocomplete="off" spellcheck="false">
+        </div>
+        <button class="btn ghost" id="btnTestRelay">Tester la connexion</button>
+        <div class="note">Une seule adresse à coller, une seule fois par appareil qui doit y avoir accès. La vraie clé Anthropic ne quitte jamais le relais — elle n'est ni dans cette page, ni dans le dépôt qui l'héberge. Voir le README, section 3bis, pour le créer.</div>
+      </div>
+
+      <div class="field"><label for="selModel">Modèle</label><select id="selModel"></select></div>
+    </div>
+
+    <div class="grp">Données</div>
+    <div class="row">
+      <div><div class="lab">Écran clair</div><div class="desc">Plus lisible en plein soleil</div></div>
+      <button class="toggle" id="tgTheme" aria-pressed="false"></button>
+    </div>
+    <button class="btn ghost" id="btnCopy">Copier la transcription</button>
+    <button class="btn ghost" id="btnSave">Enregistrer la transcription</button>
+    <button class="btn ghost" id="btnClear">Effacer la conversation</button>
+    <div class="note" id="diag"></div>
+    <button class="btn" id="setDone">Fermer</button>
+  </div>
+</div>
+
+<div id="big">
+  <div id="bigText"></div>
+  <div id="bigSrc"></div>
+  <div class="acts">
+    <button id="bigReplay">Réécouter</button>
+    <button id="bigClose">Fermer</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ================================================================
+   RELAIS PARTAGÉ — à éditer avant de publier VOTRE copie si vous
+   voulez que tout appareil qui ouvre ce lien traduise sans rien
+   régler. Ceci n'est PAS une clé secrète : seulement l'adresse d'un
+   petit relais que vous déployez vous-même, gratuitement, en dix
+   minutes (voir le README, section 3bis). La vraie clé Anthropic
+   reste sur ce relais et n'apparaît jamais dans cette page, ni dans
+   le dépôt qui l'héberge.
+   Laissez les deux lignes vides pour ne pas utiliser cette
+   fonction : c'est le réglage par défaut, rien ne change pour vous.
+   ================================================================ */
+const BUILT_IN_RELAY_URL = "";
+const BUILT_IN_RELAY_SECRET = "";
+
+/* =========================================================
+   1. CONSTANTES
+   ========================================================= */
+const LANGS = {
+  en:{code:"EN",   label:"English — anglais",        bcp:"en-US", hint:"Neutral professional English."},
+  fr:{code:"FR",   label:"Français",                  bcp:"fr-FR", hint:"Français professionnel, vouvoiement par défaut."},
+  es:{code:"ES",   label:"Español — espagnol",        bcp:"es-ES", hint:"Neutral international Spanish, 'usted' by default in professional settings."},
+  zh:{code:"中文", label:"中文 — chinois mandarin",   bcp:"zh-CN", hint:"Write in Simplified Chinese characters. Never output pinyin."},
+  ja:{code:"日本語",label:"日本語 — japonais",         bcp:"ja-JP", hint:"Natural business Japanese, です/ます register by default. Never output romaji."},
+  hi:{code:"हिन्दी",label:"हिन्दी — hindi",            bcp:"hi-IN", hint:"Write in Devanagari script. Never output transliteration."}
+};
+const LANG_NAMES = {en:"English", fr:"French", es:"Spanish", zh:"Mandarin Chinese", ja:"Japanese", hi:"Hindi"};
+/* caractères par seconde typiques à l'oral — sert à estimer le débit de la source */
+const CPS = {en:14, fr:15, es:15, zh:5.5, ja:7, hi:12};
+
+const DOMAINS = {
+  none: {label:"Aucun — langage courant", rule:""},
+  med:  {label:"Médical et santé", rule:"Field: clinical medicine. Use the exact clinical term rather than a lay paraphrase when the speaker used a clinical term, and keep lay phrasing when they used lay phrasing. Keep drug INNs, dosages, routes of administration, units and anatomical Latin exactly as spoken. Render clinical acronyms in the form actually used by practitioners in the target language."},
+  law:  {label:"Juridique et contractuel", rule:"Field: law and contracts. Use precise legal terminology; never soften a legal term into everyday language. Keep defined contract terms, article and clause numbers, party names, jurisdictions, deadlines and monetary amounts exactly. Preserve the force of obligation (shall / must / may / is entitled to) faithfully."},
+  aero: {label:"Aéronautique et spatial", rule:"Field: aeronautical and space engineering. Use established industry terminology (ATA chapter vocabulary, manufacturer nomenclature). Keep part numbers, system and component names, ATA references, and units (ft, kt, psi, lbf, kN, daN) exactly. Never replace a system or component name with a lay synonym; use the established technical term in the target language."},
+  eng:  {label:"Industrie, mécanique, énergie", rule:"Field: industrial, mechanical and energy engineering. Use standard engineering vocabulary. Keep part designations, tolerances, pressures, flows, units and standards references (ISO, DIN, ASTM, EN) exactly."},
+  it:   {label:"Informatique et logiciel", rule:"Field: software and IT. Keep product, protocol, library, service and API names in their original form. Use the established technical vocabulary of the target language, and leave widely adopted English terms untranslated where that is the professional norm in that language."},
+  fin:  {label:"Finance, comptabilité, audit", rule:"Field: finance, accounting and audit. Use exact accounting and financial terminology (IFRS / local GAAP as relevant). Keep figures, currencies, percentages, reporting periods and line-item names exactly, including their order of magnitude."},
+  biz:  {label:"Commerce, vente, achats", rule:"Field: commercial negotiation, sales and procurement. Use standard commercial vocabulary. Keep incoterms, payment and delivery terms, quantities, references, lead times and prices exactly."},
+  build:{label:"Construction et BTP", rule:"Field: construction and civil works. Use standard building trade vocabulary. Keep material designations, standards, dimensions, lot and phase designations exactly."},
+  sci:  {label:"Recherche scientifique", rule:"Field: scientific research. Use the discipline's standard terminology. Keep species names, chemical formulas, units, statistical terms and bibliographic references exactly."}
+};
+
+const MODELS = [
+  {id:"claude-haiku-4-5-20251001", label:"Haiku 4.5 — le plus rapide (recommandé)"},
+  {id:"claude-sonnet-5",           label:"Sonnet 5 — plus sûr sur le jargon"},
+  {id:"claude-opus-5",             label:"Opus 5 — le plus précis, plus lent"}
+];
+
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => v < a ? a : (v > b ? b : v);
+const esc = s => (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const now = () => Date.now();
+
+/* =========================================================
+   2. ÉTAT ET STOCKAGE
+   ========================================================= */
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem("interprete."+k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem("interprete."+k, JSON.stringify(v)); }catch(e){} }
+};
+
+const S = {
+  them:"en", me:"fr",
+  mode:"conv",            // conv | ear | conf | text
+  active:null,            // 'them' | 'me' | null
+  handsFree:false, voice:true, showSrc:true, rate:1, theme:"dark",
+  prosody:false, prosodyAmt:0.5,
+  gate:false, gateDb:12, voiceLock:0,
+  domain:"none", gloss:"", context:"",
+  confIval:45, dense:false, speakBullets:false,
+  provider:"auto", fallback:true,
+  geminiKey:"", geminiModel:"", geminiList:[],
+  mmEmail:"",
+  apiKey:"", model:MODELS[0].id,
+  anthMode:"direct", relayUrl:"", relaySecret:"",
+  voiceNameMe:"", voiceNameThem:"",
+  turns:[], bullets:[], confLog:[], seq:0
+};
+
+function persist(){
+  ["them","me","mode","handsFree","voice","showSrc","rate","theme","prosody","prosodyAmt",
+   "gate","gateDb","voiceLock","domain","gloss","context","confIval","dense","speakBullets",
+   "apiKey","model","anthMode","relayUrl","relaySecret","voiceNameMe","voiceNameThem",
+   "provider","fallback","geminiKey","geminiModel","geminiList","mmEmail"].forEach(k => store.set(k, S[k]));
+}
+function restore(){
+  const g = (k,d) => { const v = store.get(k,d); return (v === undefined || v === null) ? d : v; };
+  S.them = LANGS[g("them","en")] ? g("them","en") : "en";
+  S.me   = LANGS[g("me","fr")]   ? g("me","fr")   : "fr";
+  if(S.me === S.them) S.me = S.them === "fr" ? "en" : "fr";
+  S.mode = ["conv","ear","conf","text"].includes(g("mode","conv")) ? g("mode","conv") : "conv";
+  S.handsFree = !!g("handsFree",false);
+  S.voice = g("voice",true) !== false;
+  S.showSrc = g("showSrc",true) !== false;
+  S.rate = parseFloat(g("rate",1)) || 1;
+  S.theme = g("theme","dark") === "light" ? "light" : "dark";
+  S.prosody = !!g("prosody",false);
+  S.prosodyAmt = parseFloat(g("prosodyAmt",0.5));
+  S.gate = !!g("gate",false);
+  S.gateDb = parseFloat(g("gateDb",12)) || 12;
+  S.voiceLock = parseFloat(g("voiceLock",0)) || 0;
+  S.domain = DOMAINS[g("domain","none")] ? g("domain","none") : "none";
+  S.gloss = String(g("gloss",""));
+  S.context = String(g("context",""));
+  S.confIval = parseInt(g("confIval",45),10) || 45;
+  S.dense = !!g("dense",false);
+  S.speakBullets = !!g("speakBullets",false);
+  S.apiKey = String(g("apiKey",""));
+  S.model = MODELS.some(m => m.id === g("model","")) ? g("model","") : MODELS[0].id;
+  const pv = String(g("provider","auto"));
+  S.provider = (pv === "auto" || PROVIDERS[pv]) ? pv : "auto";
+  S.fallback = g("fallback",true) !== false;
+  S.geminiKey = String(g("geminiKey",""));
+  S.geminiModel = String(g("geminiModel",""));
+  S.geminiList = Array.isArray(g("geminiList",[])) ? g("geminiList",[]) : [];
+  S.mmEmail = String(g("mmEmail",""));
+  S.relayUrl = String(g("relayUrl", BUILT_IN_RELAY_URL));
+  S.relaySecret = String(g("relaySecret", BUILT_IN_RELAY_SECRET));
+  S.anthMode = g("anthMode", S.relayUrl ? "relay" : "direct") === "relay" ? "relay" : "direct";
+  S.voiceNameMe = String(g("voiceNameMe",""));
+  S.voiceNameThem = String(g("voiceNameThem",""));
+  document.documentElement.setAttribute("data-theme", S.theme);
+}
+
+/* =========================================================
+   3. TRADUCTEURS — plusieurs moteurs, gratuits ou payants
+   ========================================================= */
+const PROVIDERS = {
+  claude:    {name:"Claude — intégré à cette page",        short:"Claude",     llm:true,  cost:"gratuit ici"},
+  gemini:    {name:"Google Gemini — clé gratuite",          short:"Gemini",     llm:true,  cost:"gratuit"},
+  chrome:    {name:"Traducteur du navigateur — hors ligne", short:"Navigateur", llm:false, cost:"gratuit"},
+  mymemory:  {name:"MyMemory — sans inscription",           short:"MyMemory",   llm:false, cost:"gratuit"},
+  anthropic: {name:"Anthropic — clé payante",               short:"Anthropic",  llm:true,  cost:"payant"}
+};
+const PREF_ORDER = ["claude", "gemini", "anthropic", "chrome", "mymemory"];
+const MM_CODE = {en:"en", fr:"fr", es:"es", zh:"zh-CN", ja:"ja", hi:"hi"};
+
+let sampleFn = null, downloadsFn = null, capsChecked = false;
+
+(async function initBackend(){
+  await new Promise(r => setTimeout(r, 0));          /* laisse restore() passer d'abord */
+  try{ sampleFn = window.claude ? await window.claude.use("sample") : null; }catch(e){ sampleFn = null; }
+  try{ downloadsFn = window.claude ? await window.claude.use("downloads") : null; }catch(e){ downloadsFn = null; }
+  capsChecked = true;
+  refreshBackendUI();
+  const mt = chainFor("mt");
+  if(!mt.length){
+    showBanner("<b>Aucun traducteur disponible.</b> Ouvrez Réglages › Traducteur.");
+  } else if(!hasLLM() && !store.get("mtNoticed", false)){
+    store.set("mtNoticed", true);
+    showBanner("<b>Traduction gratuite active</b> via " + esc(PROVIDERS[mt[0]].short) + ". "
+      + "Pour le glossaire imposé, le jargon technique et le mode conférence, ajoutez une clé "
+      + "Google AI Studio — gratuite, sans carte bancaire — dans Réglages › Traducteur.");
+  }
+})();
+
+function available(p){
+  if(p === "claude")    return !!sampleFn;
+  if(p === "gemini")    return S.geminiKey.trim().length > 10;
+  if(p === "anthropic") return S.anthMode === "relay" ? (S.relayUrl.trim().length > 8) : (S.apiKey.trim().length > 10);
+  if(p === "chrome")    return ("Translator" in self);
+  if(p === "mymemory")  return true;
+  return false;
+}
+function chainFor(kind){
+  let list = (S.provider === "auto")
+    ? PREF_ORDER.slice()
+    : [S.provider].concat(S.fallback ? PREF_ORDER.filter(p => p !== S.provider) : []);
+  list = list.filter(p => PROVIDERS[p] && available(p));
+  if(kind === "llm") list = list.filter(p => PROVIDERS[p].llm);
+  return list;
+}
+const hasLLM = () => chainFor("llm").length > 0;
+
+/* un échec de ce type mérite qu'on tente le moteur suivant */
+function worthFallback(e){
+  const c = (e && e.code) || "";
+  return ["rate_limited","quota","bad_key","upstream_error","no_backend","empty_completion",
+          "not_granted","sampling_disabled","session_expired","pair_unavailable"].indexOf(c) >= 0;
+}
+
+/* ---------- Gemini ---------- */
+let geminiNoThinking = true;
+function mapGeminiError(status, body){
+  let msg = "";
+  try{ const j = JSON.parse(body); msg = (j.error && j.error.message) || ""; }catch(e){ msg = (body || "").slice(0, 160); }
+  if(/API key not valid|API_KEY_INVALID|api key expired/i.test(msg)) return {code:"bad_key", message: msg};
+  if(status === 400) return {code:"invalid_request", message: msg || "requête refusée"};
+  if(status === 401 || status === 403) return {code:"bad_key", message: msg || "clé refusée"};
+  if(status === 429) return {code:"rate_limited", message: msg || "quota gratuit atteint"};
+  if(status >= 500) return {code:"upstream_error", message:"service indisponible"};
+  return {code:"upstream_error", message: msg || ("erreur HTTP " + status)};
+}
+async function geminiAsk(prompt, opts){
+  opts = opts || {};
+  const model = S.geminiModel || "gemini-2.5-flash";
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model)
+            + ":streamGenerateContent?alt=sse&key=" + encodeURIComponent(S.geminiKey.trim());
+  const gen = { maxOutputTokens: opts.maxTokens || 900, temperature: 0.2 };
+  if(geminiNoThinking) gen.thinkingConfig = { thinkingBudget: 0 };
+  let res;
+  try{
+    res = await fetch(url, {
+      method:"POST", signal: opts.signal,
+      headers:{ "content-type":"application/json" },
+      body: JSON.stringify({ contents:[{ role:"user", parts:[{ text: prompt }] }], generationConfig: gen })
+    });
+  }catch(e){
+    if(e && e.name === "AbortError") throw {code:"cancelled", message:"annulé"};
+    throw {code:"upstream_error", message:"connexion impossible"};
+  }
+  if(!res.ok){
+    let body = ""; try{ body = await res.text(); }catch(e){}
+    if(res.status === 400 && /thinking|thinking_budget|thinkingConfig/i.test(body) && geminiNoThinking){
+      geminiNoThinking = false;                       /* ce modèle refuse le réglage : une seule reprise */
+      return geminiAsk(prompt, opts);
+    }
+    throw mapGeminiError(res.status, body);
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "", text = "";
+  try{
+    for(;;){
+      const r = await reader.read();
+      if(r.done) break;
+      buf += dec.decode(r.value, {stream:true});
+      buf = buf.replace(/\r\n/g, "\n");
+      let i;
+      while((i = buf.indexOf("\n\n")) >= 0){
+        const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+        for(const line of chunk.split("\n")){
+          if(line.indexOf("data:") !== 0) continue;
+          const payload = line.slice(5).trim();
+          if(!payload || payload === "[DONE]") continue;
+          let ev; try{ ev = JSON.parse(payload); }catch(e){ continue; }
+          if(ev.promptFeedback && ev.promptFeedback.blockReason) throw {code:"refused", message:"contenu bloqué"};
+          const cand = ev.candidates && ev.candidates[0];
+          const parts = cand && cand.content && cand.content.parts;
+          if(parts){
+            let delta = "";
+            for(const p of parts) if(typeof p.text === "string") delta += p.text;
+            if(delta){
+              text += delta;
+              if(opts.onText) opts.onText({text, delta});
+            }
+          }
+        }
+      }
+    }
+  }catch(e){
+    if(e && e.name === "AbortError") throw {code:"cancelled", message:"annulé", text};
+    if(e && e.code) throw e;
+    throw {code:"upstream_error", message:"flux interrompu", text};
+  }
+  if(!text.trim()) throw {code:"empty_completion", message:"réponse vide"};
+  return {text};
+}
+async function geminiListModels(){
+  const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key="
+                        + encodeURIComponent(S.geminiKey.trim()));
+  if(!r.ok){ let b = ""; try{ b = await r.text(); }catch(e){} throw mapGeminiError(r.status, b); }
+  const j = await r.json();
+  return (j.models || [])
+    .filter(m => (m.supportedGenerationMethods || []).indexOf("generateContent") >= 0)
+    .map(m => String(m.name || "").replace(/^models\//, ""))
+    .filter(n => n && !/embedding|aqa|imagen|veo|-tts|image-|vision|live-|native-audio|learnlm/i.test(n));
+}
+function bestGemini(names){
+  return names.find(n => /flash-lite/.test(n) && !/preview|exp|\d{3}$/.test(n))
+      || names.find(n => /flash/.test(n) && !/preview|exp|thinking|\d{3}$/.test(n))
+      || names.find(n => /flash/.test(n))
+      || names[0] || "gemini-2.5-flash";
+}
+
+/* ---------- Anthropic ---------- */
+function mapApiError(status, body){
+  let msg = "";
+  try{ const j = JSON.parse(body); msg = (j.error && j.error.message) || ""; }catch(e){ msg = (body || "").slice(0, 160); }
+  if(status === 401 || status === 403) return {code:"bad_key", message: msg || "clé refusée"};
+  if(status === 429) return {code:"rate_limited", message: msg || "quota atteint"};
+  if(status === 400) return {code:"invalid_request", message: msg || "requête refusée"};
+  if(status === 529 || status === 503) return {code:"upstream_error", message:"service surchargé"};
+  return {code:"upstream_error", message: msg || ("erreur HTTP " + status)};
+}
+async function anthropicAsk(prompt, opts){
+  opts = opts || {};
+  const relay = S.anthMode === "relay" && S.relayUrl.trim().length > 8;
+  const url = relay ? S.relayUrl.trim().replace(/\/+$/, "") : "https://api.anthropic.com/v1/messages";
+  const headers = { "content-type":"application/json" };
+  if(relay){
+    if(S.relaySecret.trim()) headers["x-app-secret"] = S.relaySecret.trim();
+  } else {
+    headers["x-api-key"] = S.apiKey.trim();
+    headers["anthropic-version"] = "2023-06-01";
+    headers["anthropic-dangerous-direct-browser-access"] = "true";
+  }
+  let res;
+  try{
+    res = await fetch(url, {
+      method:"POST", signal: opts.signal, headers,
+      body: JSON.stringify({ model: S.model, max_tokens: opts.maxTokens || 900, stream: true,
+                             messages:[{ role:"user", content: prompt }] })
+    });
+  }catch(e){
+    if(e && e.name === "AbortError") throw {code:"cancelled", message:"annulé"};
+    throw {code:"upstream_error", message: relay ? "relais injoignable" : "connexion impossible"};
+  }
+  if(!res.ok){
+    let body = ""; try{ body = await res.text(); }catch(e){}
+    throw mapApiError(res.status, body);
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "", text = "";
+  try{
+    for(;;){
+      const r = await reader.read();
+      if(r.done) break;
+      buf += dec.decode(r.value, {stream:true});
+      let i;
+      while((i = buf.indexOf("\n\n")) >= 0){
+        const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+        for(const line of chunk.split("\n")){
+          if(line.indexOf("data:") !== 0) continue;
+          const payload = line.slice(5).trim();
+          if(!payload || payload === "[DONE]") continue;
+          let ev; try{ ev = JSON.parse(payload); }catch(e){ continue; }
+          if(ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta"){
+            text += ev.delta.text;
+            if(opts.onText) opts.onText({text, delta: ev.delta.text});
+          } else if(ev.type === "error"){
+            throw {code:"upstream_error", message:(ev.error && ev.error.message) || "erreur", text};
+          }
+        }
+      }
+    }
+  }catch(e){
+    if(e && e.name === "AbortError") throw {code:"cancelled", message:"annulé", text};
+    if(e && e.code) throw e;
+    throw {code:"upstream_error", message:"flux interrompu", text};
+  }
+  if(!text.trim()) throw {code:"empty_completion", message:"réponse vide"};
+  return {text};
+}
+
+/* ---------- Traducteur intégré au navigateur (Chrome, Edge) ---------- */
+const chromeCache = new Map();
+async function chromeAvailability(from, to){
+  if(!("Translator" in self)) return "unavailable";
+  try{ return await self.Translator.availability({sourceLanguage: from, targetLanguage: to}); }
+  catch(e){ return "unavailable"; }
+}
+async function chromeTranslate(text, from, to, onProgress){
+  if(!("Translator" in self)) throw {code:"no_backend", message:"non disponible"};
+  const key = from + ">" + to;
+  let tr = chromeCache.get(key);
+  if(!tr){
+    const av = await chromeAvailability(from, to);
+    if(av === "unavailable") throw {code:"pair_unavailable", message:"paire de langues non gérée"};
+    try{
+      tr = await self.Translator.create({
+        sourceLanguage: from, targetLanguage: to,
+        monitor(m){ m.addEventListener("downloadprogress", e => { if(onProgress) onProgress(e.loaded); }); }
+      });
+    }catch(e){ throw {code:"pair_unavailable", message:"paire de langues non gérée"}; }
+    chromeCache.set(key, tr);
+  }
+  const out = await tr.translate(text);
+  return String(out || "");
+}
+
+/* ---------- MyMemory ---------- */
+function decodeEntities(s){
+  const el = document.createElement("textarea");
+  el.innerHTML = String(s || "");
+  return el.value;
+}
+function chunkBytes(text, max){
+  const enc = new TextEncoder();
+  const bytes = s => enc.encode(s).length;
+  const out = [];
+  let cur = "";
+  for(const w of String(text).split(/(\s+)/)){
+    if(!w) continue;
+    if(bytes(cur + w) > max){
+      if(cur.trim()) out.push(cur.trim());
+      cur = "";
+      if(bytes(w) > max){
+        let s = w;
+        while(bytes(s) > max){
+          const n = Math.max(1, Math.floor(s.length * max / bytes(s)));
+          out.push(s.slice(0, n));
+          s = s.slice(n);
+        }
+        cur = s;
+        continue;
+      }
+    }
+    cur += w;
+  }
+  if(cur.trim()) out.push(cur.trim());
+  return out.length ? out : [String(text).slice(0, 200)];
+}
+async function mmTranslate(text, from, to){
+  const pair = (MM_CODE[from] || from) + "|" + (MM_CODE[to] || to);
+  const mail = S.mmEmail.trim();
+  const parts = [];
+  for(const c of chunkBytes(text, 460)){
+    const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(c)
+              + "&langpair=" + encodeURIComponent(pair)
+              + (mail ? "&de=" + encodeURIComponent(mail) : "");
+    let r;
+    try{ r = await fetch(url); }
+    catch(e){ throw {code:"upstream_error", message:"connexion impossible"}; }
+    if(!r.ok) throw {code: r.status === 429 ? "quota" : "upstream_error", message:"erreur HTTP " + r.status};
+    let j; try{ j = await r.json(); }catch(e){ throw {code:"upstream_error", message:"réponse illisible"}; }
+    const t = decodeEntities((j.responseData && j.responseData.translatedText) || "");
+    if(/MYMEMORY WARNING|USED ALL AVAILABLE FREE TRANSLATIONS|QUOTA/i.test(t))
+      throw {code:"quota", message:"quota quotidien MyMemory épuisé"};
+    const st = String(j.responseStatus || "200");
+    if(st !== "200") throw {code: st === "429" ? "quota" : "upstream_error", message: j.responseDetails || ("statut " + st)};
+    if(!t.trim()) throw {code:"empty_completion", message:"réponse vide"};
+    parts.push(t);
+  }
+  return parts.join(" ");
+}
+
+/* ---------- répartiteurs ---------- */
+async function runLLM(p, prompt, opts){
+  if(p === "claude") return sampleFn(prompt, {
+    modelTier: (opts && opts.tier) || "quick",
+    onText: opts && opts.onText,
+    signal: opts && opts.signal,
+    cache: (opts && opts.cache !== undefined) ? opts.cache : true
+  });
+  if(p === "gemini")    return geminiAsk(prompt, opts);
+  if(p === "anthropic") return anthropicAsk(prompt, opts);
+  throw {code:"no_backend", message:"moteur incapable de raisonner"};
+}
+async function runMT(p, text, from, to){
+  if(p === "chrome")   return chromeTranslate(text, from, to);
+  if(p === "mymemory") return mmTranslate(text, from, to);
+  throw {code:"no_backend", message:"moteur inconnu"};
+}
+/* pour les puces et le résumé : il faut un moteur capable de raisonner */
+async function llmAsk(prompt, opts){
+  const list = chainFor("llm");
+  if(!list.length) throw {code:"no_llm", message:"aucun moteur capable de résumer"};
+  let last = {code:"no_backend", message:""};
+  for(let i = 0; i < list.length; i++){
+    try{ return await runLLM(list[i], prompt, opts); }
+    catch(e){
+      last = e;
+      if(!worthFallback(e) || i === list.length - 1) throw e;
+    }
+  }
+  throw last;
+}
+
+function errCopy(code, message){
+  switch(code){
+    case "no_backend":         return "Aucun traducteur connecté";
+    case "no_llm":             return "Ce moteur ne sait pas résumer — choisissez Gemini ou Claude";
+    case "bad_key":            return "Clé refusée";
+    case "quota":              return "Quota gratuit épuisé pour aujourd'hui";
+    case "pair_unavailable":   return "Paire de langues non gérée par ce moteur";
+    case "not_granted":
+    case "sampling_disabled":  return "Traduction non autorisée ici";
+    case "rate_limited":       return "Limite atteinte — laissez passer un instant";
+    case "session_expired":    return "Session expirée — reconnectez-vous";
+    case "refused":            return "Passage non traduit";
+    case "empty_completion":   return "Rien à traduire";
+    case "prompt_too_large":   return "Phrase trop longue";
+    case "invalid_request":    return "Requête refusée" + (message ? " — " + message : "");
+    default:                   return "Échec de la traduction";
+  }
+}
+
+/* =========================================================
+   4. ANALYSE AUDIO — porte de proximité, hauteur, prosodie
+   ========================================================= */
+const mon = { on:false, stream:null, ctx:null, an:null, buf:null, timer:null,
+              floorDb:-70, curDb:-100, open:false, frames:[], err:"" };
+
+async function startMonitor(){
+  if(mon.on) return true;
+  if(!S.prosody && !S.gate) return false;
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ mon.err = "micro inaccessible"; return false; }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true }
+    });
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    if(ctx.state === "suspended"){ try{ await ctx.resume(); }catch(e){} }
+    const src = ctx.createMediaStreamSource(stream);
+    const an = ctx.createAnalyser();
+    an.fftSize = 2048; an.smoothingTimeConstant = 0.15;
+    src.connect(an);
+    mon.stream = stream; mon.ctx = ctx; mon.an = an;
+    mon.buf = new Float32Array(an.fftSize);
+    mon.floorDb = -70; mon.frames = []; mon.err = ""; mon.on = true;
+    mon.timer = setInterval(monTick, 60);
+    $("meter").classList.add("show");
+    return true;
+  }catch(e){
+    mon.on = false;
+    mon.err = (e && e.name === "NotAllowedError") ? "micro refusé" : "micro indisponible";
+    return false;
+  }
+}
+function stopMonitor(){
+  if(mon.timer) clearInterval(mon.timer);
+  mon.timer = null;
+  if(mon.stream){ try{ mon.stream.getTracks().forEach(t => t.stop()); }catch(e){} }
+  if(mon.ctx){ try{ mon.ctx.close(); }catch(e){} }
+  mon.on = false; mon.stream = null; mon.ctx = null; mon.an = null; mon.frames = [];
+  $("meter").classList.remove("show");
+}
+
+function monTick(){
+  if(!mon.on || !mon.an) return;
+  try{ mon.an.getFloatTimeDomainData(mon.buf); }catch(e){ return; }
+  let sum = 0;
+  for(let i = 0; i < mon.buf.length; i++) sum += mon.buf[i] * mon.buf[i];
+  const rms = Math.sqrt(sum / mon.buf.length);
+  const db = 20 * Math.log10(rms + 1e-9);
+  mon.curDb = db;
+  /* plancher de bruit adaptatif : descend vite, remonte lentement */
+  if(db < mon.floorDb) mon.floorDb += (db - mon.floorDb) * 0.25;
+  else mon.floorDb += 0.015;
+  mon.floorDb = clamp(mon.floorDb, -95, -18);
+
+  const open = db > mon.floorDb + S.gateDb;
+  mon.open = open;
+  const f0 = open ? pitchOf(mon.buf, mon.ctx.sampleRate) : 0;
+  mon.frames.push({t:now(), db, f0, open});
+  if(mon.frames.length > 700) mon.frames.splice(0, mon.frames.length - 700);
+  drawMeter(db, open);
+}
+
+function drawMeter(db, open){
+  const fill = $("meterFill");
+  if(!fill) return;
+  const pct = clamp((db + 80) / 70, 0, 1) * 100;
+  fill.style.right = (100 - pct) + "%";
+  fill.className = open ? "open" : "";
+  const th = clamp((mon.floorDb + S.gateDb + 80) / 70, 0, 1) * 100;
+  $("meterMark").style.left = th + "%";
+}
+
+/* autocorrélation sur signal sous-échantillonné : suffisant pour suivre la f0 */
+function pitchOf(buf, sr){
+  const D = 4, n = (buf.length / D) | 0;
+  const x = new Float32Array(n);
+  for(let i = 0; i < n; i++){
+    let s = 0;
+    for(let j = 0; j < D; j++) s += buf[i*D + j];
+    x[i] = s / D;
+  }
+  const sr2 = sr / D;
+  let e0 = 0;
+  for(let i = 0; i < n; i++) e0 += x[i] * x[i];
+  if(e0 / n < 1e-6) return 0;
+  const minLag = Math.max(2, Math.floor(sr2 / 400));
+  const maxLag = Math.min(n - 2, Math.floor(sr2 / 70));
+  let best = -1, bestLag = -1;
+  for(let lag = minLag; lag <= maxLag; lag++){
+    let s = 0;
+    for(let i = 0; i < n - lag; i++) s += x[i] * x[i + lag];
+    s /= (n - lag);
+    if(s > best){ best = s; bestLag = lag; }
+  }
+  if(bestLag < 0) return 0;
+  if(best / (e0 / n) < 0.3) return 0;
+  return sr2 / bestLag;
+}
+
+function quant(arr, p){ return arr.length ? arr[clamp(Math.floor(arr.length * p), 0, arr.length - 1)] : 0; }
+
+function analyzeWindow(t0, t1){
+  if(!mon.on) return null;
+  const f = mon.frames.filter(x => x.t >= t0 - 300 && x.t <= t1 + 200);
+  if(f.length < 3) return null;
+  const open = f.filter(x => x.open);
+  const dbs = open.map(x => x.db).sort((a,b) => a - b);
+  const f0s = open.map(x => x.f0).filter(v => v > 60 && v < 420).sort((a,b) => a - b);
+  return {
+    ratio: open.length / f.length,
+    durSec: Math.max(0.2, (t1 - t0) / 1000),
+    dbMed: quant(dbs, .5),
+    floor: mon.floorDb,
+    f0Med: quant(f0s, .5), f0Lo: quant(f0s, .15), f0Hi: quant(f0s, .85),
+    f0Count: f0s.length
+  };
+}
+
+function passesGate(a){
+  if(!S.gate || !mon.on || !a) return true;
+  if(a.ratio < 0.20) return false;
+  if(S.voiceLock > 0 && a.f0Count >= 5 && a.f0Med > 0){
+    const r = a.f0Med / S.voiceLock;
+    if(r < 0.74 || r > 1.35) return false;
+  }
+  return true;
+}
+
+function prosodyFrom(a, srcLang, srcText){
+  if(!S.prosody || !a || !mon.on) return null;
+  const k = clamp(S.prosodyAmt, 0, 1);
+  if(k <= 0) return null;
+  const cps = srcText.length / a.durSec;
+  const ratio = clamp(cps / (CPS[srcLang] || 13), 0.6, 1.7);
+  const rate = 1 + (ratio - 1) * 0.55 * k;
+  let pitch = 1;
+  if(a.f0Count >= 5 && a.f0Med > 0){
+    const spread = (a.f0Hi - a.f0Lo) / a.f0Med;      /* ~0.2 monocorde, ~0.6 très expressif */
+    pitch = 1 + clamp((spread - 0.32) * 0.7, -0.18, 0.22) * k;
+  }
+  const above = a.dbMed - a.floor;                    /* ~10 dB faible, ~30 dB appuyé */
+  const vol = 1 + (clamp(0.75 + (above - 16) / 60, 0.6, 1) - 1) * k;
+  return { rate: clamp(rate, 0.65, 1.6), pitch: clamp(pitch, 0.7, 1.4), volume: clamp(vol, 0.5, 1) };
+}
+
+let lockTimer = null;
+function captureVoiceLock(){
+  if(!mon.on){
+    setLockDesc("Activez d'abord le filtre voix proche");
+    return;
+  }
+  setLockDesc("Écoute… faites parler la personne (3 s)");
+  const t0 = now();
+  clearTimeout(lockTimer);
+  lockTimer = setTimeout(() => {
+    const a = analyzeWindow(t0, now());
+    if(a && a.f0Count >= 8 && a.f0Med > 0){
+      S.voiceLock = Math.round(a.f0Med);
+      persist();
+      setLockDesc("Voix mémorisée à " + S.voiceLock + " Hz");
+    } else {
+      setLockDesc("Pas assez de voix captée — réessayez plus près");
+    }
+  }, 3000);
+}
+function setLockDesc(t){ const e = $("lockDesc"); if(e) e.textContent = t; }
+
+/* =========================================================
+   5. SYNTHÈSE VOCALE
+   ========================================================= */
+let voices = [], speaking = false, speakQ = [], ttsWarmed = false;
+function loadVoices(){ try{ voices = speechSynthesis.getVoices() || []; }catch(e){ voices = []; } }
+if("speechSynthesis" in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged = () => { loadVoices(); refreshVoiceCheck(); fillVoiceSelects(); };
+}
+function voicesFor(bcp){
+  if(!voices.length) loadVoices();
+  const base = bcp.split("-")[0].toLowerCase();
+  const norm = v => (v.lang || "").replace("_","-").toLowerCase();
+  return voices.filter(v => norm(v) === bcp.toLowerCase() || norm(v).indexOf(base + "-") === 0 || norm(v) === base);
+}
+function pickVoice(langKey, preferredName){
+  const pool = voicesFor(LANGS[langKey].bcp);
+  if(!pool.length) return null;
+  if(preferredName){
+    const exact = pool.find(v => v.name === preferredName);
+    if(exact) return exact;
+  }
+  const good = pool.find(v => /neural|natural|enhanced|premium|google|siri/i.test(v.name || ""));
+  return good || pool[0];
+}
+function hasVoice(langKey){ return voicesFor(LANGS[langKey].bcp).length > 0; }
+
+function warmTTS(){
+  if(ttsWarmed || !("speechSynthesis" in window)) return;
+  try{ const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); ttsWarmed = true; }catch(e){}
+  loadVoices();
+}
+
+function say(text, langKey, pros){
+  if(!S.voice || !text || !text.trim() || !("speechSynthesis" in window)) return;
+  speakQ.push({text:text.trim(), langKey, pros:pros || null});
+  drainSpeech();
+}
+function drainSpeech(){
+  if(speaking || !speakQ.length) return;
+  const item = speakQ.shift();
+  const u = new SpeechSynthesisUtterance(item.text);
+  const prefName = item.langKey === S.me ? S.voiceNameMe : S.voiceNameThem;
+  const v = pickVoice(item.langKey, prefName);
+  if(v) u.voice = v;
+  u.lang = LANGS[item.langKey].bcp;
+  u.rate   = clamp(S.rate * (item.pros ? item.pros.rate : 1), 0.5, 2);
+  u.pitch  = clamp(item.pros ? item.pros.pitch : 1, 0.5, 2);
+  u.volume = clamp(item.pros ? item.pros.volume : 1, 0.2, 1);
+  speaking = true;
+  suspendRecognition();
+  setStatus("busy", "Lecture…");
+  let done = false;
+  const finish = () => {
+    if(done) return; done = true;
+    speaking = false;
+    clearTimeout(wd);
+    if(speakQ.length) drainSpeech();
+    else resumeRecognition();
+  };
+  u.onend = finish; u.onerror = finish;
+  const wd = setTimeout(() => { try{ speechSynthesis.cancel(); }catch(e){} finish(); }, 4500 + item.text.length * 130);
+  try{ speechSynthesis.speak(u); }catch(e){ finish(); }
+}
+function stopSpeaking(){
+  speakQ.length = 0;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  speaking = false;
+}
+
+/* =========================================================
+   6. RECONNAISSANCE VOCALE
+   ========================================================= */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SR_OK = !!SR;
+let rec = null, listening = false, suspended = false;
+let lastInterim = "", utterT0 = 0, silenceTimer = null, restartTimer = null, restartAt = 0;
+
+function sideOf(side){
+  return side === "them" ? {from:S.them, to:S.me} : {from:S.me, to:S.them};
+}
+function activeSide(){ return S.mode === "conv" ? (S.active || "them") : "them"; }
+
+function buildRec(langKey){
+  const r = new SR();
+  r.lang = LANGS[langKey].bcp;
+  r.continuous = true;
+  r.interimResults = true;
+  r.maxAlternatives = 1;
+  r.onresult = ev => {
+    let interim = "";
+    for(let i = ev.resultIndex; i < ev.results.length; i++){
+      const res = ev.results[i];
+      const txt = (res[0] && res[0].transcript) || "";
+      if(res.isFinal) onUtterance(txt);
+      else interim += txt;
+    }
+    if(interim && !lastInterim) utterT0 = now() - 400;
+    setLive(interim);
+    if(interim !== lastInterim){ lastInterim = interim; armSilence(); }
+  };
+  r.onerror = ev => {
+    const e = ev.error;
+    if(e === "not-allowed" || e === "service-not-allowed"){
+      stopListening();
+      showBanner("<b>Micro refusé.</b> Autorisez le microphone pour cette page dans les réglages du navigateur, puis rechargez.");
+    } else if(e === "network"){
+      showBanner("<b>La reconnaissance vocale a perdu le réseau.</b> Elle a besoin d'une connexion active.");
+    }
+  };
+  r.onend = () => { if(listening && !suspended && !speaking) scheduleRestart(); };
+  return r;
+}
+function killRec(){
+  if(!rec) return;
+  const old = rec; rec = null;
+  old.onresult = null; old.onerror = null; old.onend = null;
+  try{ old.abort(); }catch(e){}
+}
+function scheduleRestart(){
+  clearTimeout(restartTimer);
+  const delay = (now() - restartAt < 700) ? 600 : 120;
+  restartTimer = setTimeout(() => {
+    if(!listening || suspended || speaking) return;
+    if(!rec) rec = buildRec(sideOf(activeSide()).from);
+    restartAt = now();
+    try{ rec.start(); }catch(e){}
+  }, delay);
+}
+function armSilence(){
+  clearTimeout(silenceTimer);
+  silenceTimer = setTimeout(() => {
+    if(listening && !suspended && rec && lastInterim.trim().length > 1){
+      try{ rec.stop(); }catch(e){}
+    }
+  }, S.mode === "conf" ? 3000 : 2200);
+}
+
+async function startListening(side){
+  if(!SR_OK) return;
+  warmTTS();
+  if(S.mode !== "conv") side = "them";
+  if(listening && S.active === side){ stopListening(); return; }
+  stopSpeaking();
+  listening = false; killRec();
+  S.active = side;
+  if(S.prosody || S.gate) await startMonitor();
+  listening = true; suspended = false; lastInterim = ""; utterT0 = now();
+  rec = buildRec(sideOf(side).from);
+  restartAt = now();
+  try{ rec.start(); }catch(e){ scheduleRestart(); }
+  if(S.mode === "conf") startConfTimer();
+  requestWake();
+  renderControls();
+  $("live").classList.add("show");
+  setLive("");
+  setStatus("on", listeningLabel());
+}
+function stopListening(){
+  listening = false; suspended = false;
+  clearTimeout(silenceTimer); clearTimeout(restartTimer);
+  killRec();
+  stopConfTimer();
+  stopMonitor();
+  S.active = null; lastInterim = "";
+  $("live").classList.remove("show");
+  renderControls();
+  setStatus("", "Prêt");
+  releaseWake();
+}
+function suspendRecognition(){
+  if(!listening) return;
+  suspended = true;
+  clearTimeout(silenceTimer); clearTimeout(restartTimer);
+  killRec();
+  setLive("");
+}
+function resumeRecognition(){
+  if(!listening){ setStatus("", "Prêt"); return; }
+  suspended = false; lastInterim = ""; utterT0 = now();
+  rec = buildRec(sideOf(activeSide()).from);
+  restartAt = now();
+  try{ rec.start(); }catch(e){ scheduleRestart(); }
+  setStatus("on", listeningLabel());
+}
+function listeningLabel(){
+  if(S.mode === "conf") return "Prise de notes";
+  if(S.mode === "ear")  return "À l'écoute";
+  return S.active === "them" ? "À l'écoute" : "Parlez";
+}
+function setLive(txt){
+  if(!$("live").classList.contains("show")) return;
+  const el = $("liveTxt");
+  if(txt && txt.trim()){ el.innerHTML = "<span>" + esc(txt) + "</span>"; return; }
+  if(S.mode === "conf") el.textContent = "Notes en cours — " + S.confLog.length + " passage(s) captés";
+  else if(S.mode === "ear") el.textContent = "En attente de parole en " + LANGS[S.them].code + "…";
+  else el.textContent = (S.active === "them" ? "En attente de parole…" : "À vous…");
+}
+function setStatus(cls, txt){ $("dot").className = cls || ""; $("statusTxt").textContent = txt; }
+
+/* veille écran */
+let wake = null;
+async function requestWake(){ try{ if("wakeLock" in navigator && !wake) wake = await navigator.wakeLock.request("screen"); }catch(e){} }
+function releaseWake(){ try{ if(wake){ wake.release(); wake = null; } }catch(e){} }
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && listening) requestWake(); });
+
+/* =========================================================
+   7. GLOSSAIRE ET PROMPTS
+   ========================================================= */
+function glossaryLines(){
+  return S.gloss.split("\n")
+    .map(l => l.trim())
+    .filter(l => l && /[=:→>]/.test(l))
+    .slice(0, 80)
+    .map(l => l.replace(/\s*(=|:|→|->|>)\s*/, " = "));
+}
+function recentContext(turn){
+  const prev = S.turns.filter(t => t.id !== turn.id && t.status === "done" && t.trans).slice(-4);
+  if(!prev.length) return "";
+  return prev.map(t => LANG_NAMES[t.from] + ": " + t.src + "\n" + LANG_NAMES[t.to] + ": " + t.trans).join("\n---\n");
+}
+function terminologyBlock(L){
+  const dom = DOMAINS[S.domain];
+  if(dom && dom.rule){ L.push(""); L.push("Terminology discipline:"); L.push("- " + dom.rule); }
+  const gl = glossaryLines();
+  if(gl.length){
+    L.push("");
+    L.push("Mandatory glossary — apply these equivalences exactly, in either direction, overriding any other choice:");
+    gl.forEach(g => L.push("- " + g));
+  }
+  if(S.context.trim()){
+    L.push("");
+    L.push("Situation (background only, never translate it):");
+    L.push(S.context.trim().slice(0, 900));
+  }
+}
+
+function transPrompt(turn){
+  const srcName = LANG_NAMES[turn.from], dstName = LANG_NAMES[turn.to];
+  const strict = S.mode !== "conv";
+  const L = [];
+  L.push("You are a professional simultaneous interpreter working live in the room.");
+  L.push("Translate the SOURCE utterance from " + srcName + " into " + dstName + ".");
+  L.push("");
+  L.push("Output rules:");
+  L.push("- Output ONLY the translation. No quotes, no label, no note, no alternative rendering, no transliteration.");
+  L.push("- " + LANGS[turn.to].hint);
+  L.push("- Mirror the speaker's register, tone and force. A blunt sentence stays blunt, a hesitant one stays hesitant, an enthusiastic one stays enthusiastic.");
+  L.push("- Reproduce terminal punctuation faithfully: a question ends with a question mark, an exclamation with an exclamation mark, an unfinished thought with an ellipsis. The text will be read aloud and this punctuation is what carries the intonation.");
+  L.push("- Keep proper nouns, company names, figures, dates, units and acronyms exact.");
+  L.push("- The source comes from speech recognition: repair obvious mis-hearings and restore punctuation, but never add information that was not said.");
+  L.push("- If the utterance is cut off mid-sentence, translate only what is there. Never complete it.");
+  L.push("- If the source is already in " + dstName + ", return it unchanged.");
+  if(strict) L.push("- If the SOURCE is not actually " + srcName + " — for instance it is garbled recognition of someone speaking another language — or if it is meaningless noise, filler or a stray fragment, reply with exactly: [SKIP]");
+  else L.push("- If the source is meaningless noise, reply with exactly: [SKIP]");
+  terminologyBlock(L);
+  const ctx = recentContext(turn);
+  if(ctx){
+    L.push("");
+    L.push("Earlier exchanges, for terminology and pronoun consistency only. Never translate these:");
+    L.push(ctx);
+  }
+  L.push("");
+  L.push("SOURCE (" + srcName + "):");
+  L.push(turn.src);
+  return L.join("\n");
+}
+
+function bulletPrompt(fragment){
+  const srcName = LANG_NAMES[S.them], dstName = LANG_NAMES[S.me];
+  const L = [];
+  L.push("You are taking live notes for someone attending a talk given in " + srcName + ". They read " + dstName + ".");
+  L.push("From the transcript fragment below, write only the key points, as bullets in " + dstName + ".");
+  L.push("");
+  L.push("Rules:");
+  L.push("- " + (S.dense ? "Between 2 and 5 bullets, each up to about 25 words." : "Between 1 and 3 bullets, each one line, about 15 words maximum."));
+  L.push("- Only information that is NEW in this fragment. Never repeat a point already written below.");
+  L.push("- Keep figures, names, dates, units and technical terms exact.");
+  L.push("- Drop greetings, filler, digressions, repetition and anything purely conversational.");
+  L.push("- Write in " + dstName + ". " + LANGS[S.me].hint);
+  L.push("- Each line starts with \"- \". No heading, no preamble, no closing line.");
+  L.push("- If the fragment holds nothing worth noting, reply with exactly: [SKIP]");
+  terminologyBlock(L);
+  const prev = S.bullets.slice(-14).map(b => "- " + b.text).join("\n");
+  if(prev){
+    L.push("");
+    L.push("Points already noted — do not repeat them:");
+    L.push(prev);
+  }
+  L.push("");
+  L.push("Transcript fragment (" + srcName + "):");
+  L.push(fragment);
+  return L.join("\n");
+}
+
+function fullSummaryPrompt(){
+  const srcName = LANG_NAMES[S.them], dstName = LANG_NAMES[S.me];
+  const L = [];
+  L.push("Write the meeting notes of a session held in " + srcName + ", for a reader of " + dstName + ".");
+  L.push("");
+  L.push("Format, in " + dstName + ", plain text only:");
+  L.push("A first line giving the subject, no label.");
+  L.push("Then these sections, each introduced by its name alone on a line, and only if it has content:");
+  L.push("Points clés / Chiffres et données / Décisions et actions / Questions ouvertes");
+  L.push("Bullets start with \"- \". No preamble, no closing remark, no markdown symbols other than the leading dash.");
+  L.push("Keep every figure, name, date and unit exact. Do not invent anything that is not in the material.");
+  L.push("- " + LANGS[S.me].hint);
+  terminologyBlock(L);
+  const notes = S.bullets.map(b => "- " + b.text).join("\n");
+  if(notes){ L.push(""); L.push("Notes taken during the session (" + dstName + "):"); L.push(notes.slice(-14000)); }
+  const raw = S.confLog.join(" ");
+  if(raw){ L.push(""); L.push("Raw transcript (" + srcName + "):"); L.push(raw.slice(-22000)); }
+  const conv = S.turns.filter(t => t.trans).map(t => LANG_NAMES[t.from] + ": " + t.src).join("\n");
+  if(conv && !raw){ L.push(""); L.push("Transcript:"); L.push(conv.slice(-22000)); }
+  return L.join("\n");
+}
+
+/* =========================================================
+   8. PIPELINE DE TRADUCTION
+   ========================================================= */
+const queue = []; let working = false; let pendingFlip = null;
+
+function onUtterance(raw){
+  const text = (raw || "").trim();
+  if(text.length < 2) return;
+  const t1 = now();
+  const a = analyzeWindow(utterT0 || (t1 - 1500), t1);
+  utterT0 = t1;
+
+  if(!passesGate(a)){
+    flashLive("écarté — voix trop lointaine");
+    return;
+  }
+
+  if(S.mode === "conf"){
+    S.confLog.push(text);
+    confBuffer += (confBuffer ? " " : "") + text;
+    setLive("");
+    if(confBuffer.length > 1400) runBullets();
+    return;
+  }
+
+  const side = activeSide();
+  const cfg = sideOf(side);
+  const turn = { id:++S.seq, side, from:cfg.from, to:cfg.to, src:text, trans:"",
+                 status:"pending", pros: prosodyFrom(a, cfg.from, text) };
+  if(S.mode === "conv" && S.handsFree) turn.flip = side === "them" ? "me" : "them";
+  S.turns.push(turn);
+  addTurnNode(turn);
+  queue.push(turn);
+  pump();
+}
+
+function flashLive(msg){
+  const el = $("liveTxt");
+  if(!el) return;
+  el.textContent = msg;
+  setTimeout(() => setLive(lastInterim), 1200);
+}
+
+async function pump(){
+  if(working) return;
+  working = true;
+  while(queue.length){ await translateTurn(queue.shift()); }
+  working = false;
+}
+
+const TERM = /[.!?。！？…।؟]["'»”’)\]]*(\s|$)/g;
+function lastBoundary(text, from){
+  TERM.lastIndex = Math.max(0, from);
+  let idx = -1, m;
+  while((m = TERM.exec(text)) !== null) idx = m.index + m[0].length;
+  return idx;
+}
+function cleanOut(t){
+  let s = (t || "").trim();
+  s = s.replace(/^```[a-z]*\s*/i, "").replace(/```$/, "").trim();
+  s = s.replace(/^(translation|traduction)\s*:\s*/i, "").trim();
+  if(s.length > 1 && /^["'«“]/.test(s) && /["'»”]$/.test(s)) s = s.slice(1, -1).trim();
+  return s;
+}
+const isSkip = s => /^\[?\s*SKIP\s*\]?\.?$/i.test((s || "").trim());
+
+function finishTurn(turn, full){
+  if(isSkip(full) || !full.trim()){
+    const n = $("turn-" + turn.id); if(n) n.remove();
+    S.turns = S.turns.filter(t => t.id !== turn.id);
+    afterTurn(turn); return;
+  }
+  turn.trans = full; turn.status = "done";
+  renderTurn(turn);
+  const sp = turn.spoken || 0;
+  if(S.mode !== "text" && S.voice && full.length > sp){
+    say(full.slice(sp), turn.to, turn.pros);
+    pendingFlip = turn.flip || null;
+  } else afterTurn(turn);
+}
+
+async function translateTurn(turn){
+  const order = chainFor("mt");
+  if(!order.length){
+    turn.status = "error"; turn.err = errCopy("no_backend");
+    renderTurn(turn); afterTurn(turn); return;
+  }
+  setStatus("busy", "Traduction…");
+  let lastErr = null, done = false;
+
+  for(let i = 0; i < order.length && !done; i++){
+    const p = order[i];
+    turn.trans = ""; turn.spoken = 0; turn.provider = p;
+    if(i > 0){ turn.status = "pending"; renderTurn(turn); }
+    try{
+      let full;
+      if(PROVIDERS[p].llm){
+        const stream = (i === 0);
+        let spoken = 0;
+        const res = await runLLM(p, transPrompt(turn), {
+          tier:"quick", maxTokens:900,
+          onText: stream ? (({text}) => {
+            const t = cleanOut(text);
+            if(isSkip(t)) return;
+            turn.trans = t; renderTurn(turn);
+            if(S.mode !== "text" && S.voice && t.length - spoken >= 55){
+              const b = lastBoundary(t, spoken);
+              if(b > spoken){ say(t.slice(spoken, b), turn.to, turn.pros); spoken = b; }
+            }
+          }) : undefined
+        });
+        full = cleanOut(res.text);
+        turn.spoken = spoken;
+      } else {
+        full = cleanOut(await runMT(p, turn.src, turn.from, turn.to));
+        /* un moteur de traduction simple rend parfois le texte inchangé : hors mode
+           conversation, cela trahit une phrase captée dans la mauvaise langue */
+        if(S.mode !== "conv" && full.trim().toLowerCase() === turn.src.trim().toLowerCase()) full = "[SKIP]";
+      }
+      finishTurn(turn, full);
+      done = true;
+    }catch(e){
+      lastErr = e;
+      if(e && e.code === "cancelled"){ afterTurn(turn); return; }
+      if(e && e.code === "not_granted" || e && e.code === "sampling_disabled"){
+        sampleFn = null; refreshBackendUI();
+      }
+      if(!worthFallback(e) || i === order.length - 1) break;
+      turn.trans = ""; renderTurn(turn);
+    }
+  }
+
+  if(!done){
+    const code = (lastErr && lastErr.code) || "upstream_error";
+    if(lastErr && lastErr.text) turn.trans = cleanOut(lastErr.text);
+    turn.status = "error";
+    turn.err = errCopy(code, lastErr && lastErr.message);
+    turn.retryable = true;
+    renderTurn(turn);
+    if(code === "bad_key")      showBanner("<b>Clé refusée.</b> Vérifiez-la dans Réglages › Traducteur.");
+    if(code === "quota")        showBanner("<b>Quota gratuit épuisé.</b> Ajoutez une adresse e-mail pour MyMemory, ou passez sur une clé Google AI Studio gratuite.");
+    if(code === "rate_limited") showBanner("<b>Limite atteinte.</b> Espacez les prises de parole, ou activez le secours automatique.");
+    afterTurn(turn);
+  }
+  if(!speaking && !speakQ.length) setStatus(listening ? "on" : "", listening ? listeningLabel() : "Prêt");
+}
+
+function afterTurn(turn){ if(turn && turn.flip && listening && S.mode === "conv") doFlip(turn.flip); }
+function doFlip(side){ if(listening && S.mode === "conv" && S.active !== side) startListening(side); }
+setInterval(() => {
+  if(!speaking && !speakQ.length && pendingFlip){
+    const f = pendingFlip; pendingFlip = null;
+    if(listening && S.mode === "conv") doFlip(f);
+  }
+}, 300);
+
+/* =========================================================
+   9. MODE CONFÉRENCE — puces au fil de l'eau
+   ========================================================= */
+let confBuffer = "", confTimer = null, confBusy = false;
+function startConfTimer(){
+  stopConfTimer();
+  confTimer = setInterval(() => { if(confBuffer.trim().length > 120) runBullets(); }, S.confIval * 1000);
+}
+function stopConfTimer(){ if(confTimer) clearInterval(confTimer); confTimer = null; }
+
+async function runBullets(){
+  if(confBusy || !hasLLM()) return;
+  const frag = confBuffer.trim();
+  if(frag.length < 60) return;
+  confBuffer = "";
+  confBusy = true;
+  const blockId = "blk" + now();
+  addBulletBlock(blockId);
+  try{
+    const res = await llmAsk(bulletPrompt(frag), {tier:"quick", maxTokens:800, cache:false});
+    const txt = cleanOut(res.text);
+    removePendingBullet(blockId);
+    if(isSkip(txt) || !txt){ removeBlockIfEmpty(blockId); }
+    else{
+      const lines = txt.split("\n").map(l => l.replace(/^\s*[-•*]\s*/, "").trim()).filter(l => l && !isSkip(l));
+      lines.forEach(l => {
+        const b = {id:++S.seq, text:l, block:blockId};
+        S.bullets.push(b);
+        addBulletNode(b);
+        if(S.speakBullets) say(l, S.me, null);
+      });
+      if(!lines.length) removeBlockIfEmpty(blockId);
+    }
+  }catch(e){
+    removePendingBullet(blockId);
+    const code = (e && e.code) || "upstream_error";
+    const b = {id:++S.seq, text:"— " + errCopy(code, e && e.message), block:blockId, err:true};
+    addBulletNode(b);
+    if(code === "rate_limited") showBanner("<b>Limite atteinte.</b> Augmentez l'intervalle des puces dans les réglages.");
+  }
+  confBusy = false;
+}
+
+async function runFullSummary(){
+  if(!hasLLM()){ showBanner("<b>Ce moteur ne sait pas résumer.</b> Le résumé demande Claude ou une clé Google AI Studio gratuite — voir Réglages › Traducteur."); return; }
+  if(!S.bullets.length && !S.confLog.length && !S.turns.length) return;
+  const id = "sum" + now();
+  const head = document.createElement("div");
+  head.className = "blockhead";
+  head.textContent = "Résumé complet";
+  $("feed").appendChild(head);
+  const node = document.createElement("div");
+  node.className = "bullet pending";
+  node.id = id;
+  node.textContent = "rédaction…";
+  $("feed").appendChild(node);
+  scrollFeed();
+  setStatus("busy", "Résumé…");
+  try{
+    const res = await llmAsk(fullSummaryPrompt(), {tier:"default", maxTokens:2400, cache:false,
+      onText: ({text}) => { node.textContent = text; scrollFeed(); }});
+    node.className = "bullet";
+    node.style.display = "block";
+    node.textContent = "";
+    const pre = document.createElement("div");
+    pre.style.whiteSpace = "pre-wrap";
+    pre.style.fontSize = "16px";
+    pre.textContent = cleanOut(res.text);
+    node.appendChild(pre);
+    S.summary = cleanOut(res.text);
+  }catch(e){
+    node.className = "bullet";
+    node.textContent = errCopy((e && e.code) || "upstream_error", e && e.message);
+  }
+  setStatus(listening ? "on" : "", listening ? listeningLabel() : "Prêt");
+  scrollFeed();
+}
+
+/* =========================================================
+   10. RENDU
+   ========================================================= */
+const feed = $("feed");
+function scrollFeed(){
+  const near = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 200;
+  if(near) feed.scrollTop = feed.scrollHeight;
+}
+function clearIntro(){ const i = feed.querySelector(".intro"); if(i) i.remove(); }
+
+function addTurnNode(turn){
+  clearIntro();
+  const node = document.createElement("div");
+  node.className = "turn " + turn.side;
+  node.id = "turn-" + turn.id;
+  feed.appendChild(node);
+  renderTurn(turn);
+}
+function renderTurn(turn){
+  const node = $("turn-" + turn.id);
+  if(!node) return;
+  const from = LANGS[turn.from].code, to = LANGS[turn.to].code;
+  let body;
+  if(turn.status === "error"){
+    body = (turn.trans ? '<div class="trans">' + esc(turn.trans) + "</div>" : "")
+         + '<div class="err"><span>' + esc(turn.err) + "</span>"
+         + (turn.retryable ? '<button data-retry="' + turn.id + '">Réessayer</button>' : "") + "</div>";
+  } else if(!turn.trans){
+    body = '<div class="trans waiting">traduction…</div>';
+  } else {
+    body = '<div class="trans">' + esc(turn.trans) + "</div>";
+  }
+  const src = S.showSrc ? '<div class="src">' + esc(turn.src) + "</div>" : "";
+  const who = turn.side === "them" ? "Interlocuteur" : "Moi";
+  const prov = (turn.provider && PROVIDERS[turn.provider]) ? '<span>' + esc(PROVIDERS[turn.provider].short) + "</span>" : "";
+  node.innerHTML = '<div class="tmeta"><strong>' + who + "</strong><span>" + esc(from) + " → " + esc(to) + "</span>" + prov + "</div>"
+                 + '<div class="bubble" data-speak="' + turn.id + '">' + body + src + "</div>";
+  scrollFeed();
+}
+
+function addBulletBlock(blockId){
+  clearIntro();
+  const head = document.createElement("div");
+  head.className = "blockhead";
+  head.id = "head-" + blockId;
+  const d = new Date();
+  head.textContent = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  feed.appendChild(head);
+  const p = document.createElement("div");
+  p.className = "bullet pending";
+  p.id = "pend-" + blockId;
+  p.textContent = "lecture du passage…";
+  feed.appendChild(p);
+  scrollFeed();
+}
+function removePendingBullet(blockId){ const p = $("pend-" + blockId); if(p) p.remove(); }
+function removeBlockIfEmpty(blockId){
+  const h = $("head-" + blockId);
+  if(h && (!h.nextElementSibling || h.nextElementSibling.classList.contains("blockhead"))) h.remove();
+}
+function addBulletNode(b){
+  clearIntro();
+  const n = document.createElement("div");
+  n.className = "bullet";
+  n.id = "b-" + b.id;
+  n.textContent = b.text;
+  n.setAttribute("data-bullet", b.id);
+  feed.appendChild(n);
+  scrollFeed();
+}
+
+feed.addEventListener("click", ev => {
+  const r = ev.target.closest("[data-retry]");
+  if(r){
+    const t = S.turns.find(x => x.id === +r.dataset.retry);
+    if(t){ t.status = "pending"; t.trans = ""; t.err = null; renderTurn(t); queue.push(t); pump(); }
+    return;
+  }
+  const b = ev.target.closest("[data-speak]");
+  if(b){
+    const t = S.turns.find(x => x.id === +b.dataset.speak);
+    if(t && t.trans){ stopSpeaking(); say(t.trans, t.to, t.pros); }
+    return;
+  }
+  const bu = ev.target.closest("[data-bullet]");
+  if(bu){
+    const x = S.bullets.find(y => y.id === +bu.dataset.bullet);
+    if(x) { stopSpeaking(); say(x.text, S.me, null); }
+  }
+});
+
+function renderIntro(){
+  if(feed.children.length) return;
+  const d = document.createElement("div");
+  d.className = "intro";
+  if(S.mode === "text"){
+    d.innerHTML = "<h2>Traduction par texte</h2><ul>"
+      + "<li>Écrivez votre message dans le bloc <b>Interlocuteur</b> ou <b>Moi</b>.</li>"
+      + "<li>Appuyez sur <b>➜</b> ou sur Entrée pour lancer la traduction.</li>"
+      + "<li>Utilisez Maj + Entrée pour écrire sur plusieurs lignes.</li></ul>"
+      + '<div class="hint">Le mode Texte utilise le même moteur de traduction et les mêmes langues que les autres modes.</div>';
+  } else if(S.mode === "conv"){
+    d.innerHTML = "<h2>Conversation</h2><ol>"
+      + "<li>Posez le téléphone entre vous, son au maximum.</li>"
+      + "<li>Appuyez sur le canal de la personne qui va parler.</li>"
+      + "<li>La traduction s'affiche en grand et se dit à voix haute.</li></ol>"
+      + '<div class="hint">Activez <b>Mains libres</b> et l\'appli passe seule d\'un canal à l\'autre après chaque prise de parole.</div>';
+  } else if(S.mode === "ear"){
+    d.innerHTML = "<h2>Oreillette</h2><ul>"
+      + "<li>Un écouteur dans <b>votre</b> oreille, le téléphone dans la poche ou en main.</li>"
+      + "<li>L'appli n'écoute que le " + esc(LANGS[S.them].code) + " et ne vous parle qu'en " + esc(LANGS[S.me].code) + ".</li>"
+      + "<li>Ce que vous dites, vous, est ignoré.</li></ul>"
+      + '<div class="hint">Pour que l\'autre personne vous entende aussi dans sa langue&nbsp;: envoyez-lui ce même lien. Sur son téléphone, elle inverse les deux langues et met son propre écouteur. Les deux appareils travaillent chacun de leur côté, sans rien avoir à connecter.</div>';
+  } else {
+    d.innerHTML = "<h2>Conférence</h2><ul>"
+      + "<li>L'appli écoute en continu et écrit les idées clés en puces, en " + esc(LANGS[S.me].code) + ".</li>"
+      + "<li>Pas de traduction dans l'oreille&nbsp;: vous lisez au rythme qui vous arrange.</li>"
+      + "<li>« Résumé complet » rédige la synthèse structurée à la fin.</li></ul>"
+      + '<div class="hint">Réglez la fréquence des puces selon le débit de l\'orateur — 45 s convient à la plupart des exposés.</div>';
+  }
+  feed.appendChild(d);
+}
+
+const QUICK = {
+  conv: [["hands","Mains libres"],["voice","Voix"],["repeat","Répéter"],["big","Grand écran"],["set","Réglages"]],
+  ear:  [["voice","Voix"],["repeat","Répéter"],["gate","Filtre bruit"],["big","Grand écran"],["set","Réglages"]],
+  conf: [["sum","Résumé complet"],["now","Puces maintenant"],["gate","Filtre bruit"],["copy","Copier"],["set","Réglages"]],
+  text: []
+};
+function renderQuickbar(){
+  const bar = $("quickbar");
+  bar.style.display = S.mode === "text" ? "none" : "";
+  bar.innerHTML = (QUICK[S.mode] || []).map(([act,label]) => {
+    let pressed = "";
+    if(act === "hands") pressed = ' aria-pressed="' + S.handsFree + '"';
+    if(act === "voice") pressed = ' aria-pressed="' + S.voice + '"';
+    if(act === "gate")  pressed = ' aria-pressed="' + S.gate + '"';
+    return '<button class="qb" data-act="' + act + '"' + pressed + ">" + esc(label) + "</button>";
+  }).join("");
+}
+$("quickbar").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-act]");
+  if(!b) return;
+  const a = b.dataset.act;
+  if(a === "hands"){ S.handsFree = !S.handsFree; persist(); renderQuickbar(); }
+  if(a === "voice"){ S.voice = !S.voice; if(!S.voice) stopSpeaking(); else warmTTS(); persist(); renderQuickbar(); }
+  if(a === "gate"){ S.gate = !S.gate; persist(); renderQuickbar(); if(S.gate && listening) startMonitor(); if(!S.gate && !S.prosody) stopMonitor(); }
+  if(a === "repeat"){ const t = [...S.turns].reverse().find(x => x.trans); if(t){ stopSpeaking(); say(t.trans, t.to, t.pros); } }
+  if(a === "big") openBig();
+  if(a === "sum") runFullSummary();
+  if(a === "now") runBullets();
+  if(a === "copy") copyTranscript();
+  if(a === "set"){ syncSettings(); openSheet("sheetSet"); }
+});
+
+
+function submitText(side){
+  if(S.mode !== "text") return;
+  const ta = side === "them" ? $("taThem") : $("taMe");
+  const text = (ta.value || "").trim();
+  if(text.length < 2) return;
+
+  const cfg = sideOf(side);
+  const turn = {
+    id:++S.seq,
+    side,
+    from:cfg.from,
+    to:cfg.to,
+    src:text,
+    trans:"",
+    status:"pending",
+    pros:null
+  };
+
+  ta.value = "";
+  ta.style.height = "";
+  updateTextButtons();
+
+  S.turns.push(turn);
+  addTurnNode(turn);
+  queue.push(turn);
+  pump();
+}
+
+function updateTextButtons(){
+  const taThem = $("taThem"), taMe = $("taMe");
+  const sendThem = $("sendThem"), sendMe = $("sendMe");
+  if(taThem && sendThem) sendThem.disabled = !(taThem.value || "").trim();
+  if(taMe && sendMe) sendMe.disabled = !(taMe.value || "").trim();
+}
+
+function autoSizeTextArea(ta){
+  ta.style.height = "auto";
+  ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
+}
+
+function initTextInputs(){
+  const fields = [
+    [$("taThem"), $("sendThem"), "them"],
+    [$("taMe"), $("sendMe"), "me"]
+  ];
+
+  fields.forEach(([ta, btn, side]) => {
+    if(!ta || !btn) return;
+
+    ta.addEventListener("input", () => {
+      autoSizeTextArea(ta);
+      updateTextButtons();
+    });
+
+    ta.addEventListener("keydown", ev => {
+      if(ev.key === "Enter" && !ev.shiftKey && !ev.isComposing){
+        ev.preventDefault();
+        submitText(side);
+      }
+    });
+
+    btn.addEventListener("click", () => submitText(side));
+  });
+
+  updateTextButtons();
+}
+
+function renderControls(){
+  const isText = S.mode === "text";
+  const two = S.mode === "conv";
+
+  $("channels").className = "channels" + (two ? " two" : "") + (isText ? " texte-hidden" : "");
+  $("chMe").style.display = two ? "" : "none";
+  $("textBar").classList.toggle("show", isText);
+
+  $("chThem").setAttribute("aria-pressed", String(!isText && listening && (two ? S.active === "them" : true)));
+  $("chMe").setAttribute("aria-pressed", String(!isText && listening && S.active === "me"));
+  $("chThemLang").textContent = two ? LANGS[S.them].code : (LANGS[S.them].code + " → " + LANGS[S.me].code);
+  $("chMeLang").textContent = LANGS[S.me].code;
+  $("chThemRole").textContent = S.mode === "conf" ? "Orateur" : "Interlocuteur";
+
+  if(two){
+    $("chThemState").textContent = (listening && S.active === "them") ? "À l'écoute — appuyer pour arrêter" : "Appuyer pour écouter";
+    $("chMeState").textContent   = (listening && S.active === "me")   ? "Micro ouvert — appuyer pour arrêter" : "Appuyer pour parler";
+  } else if(S.mode === "ear"){
+    $("chThemState").textContent = listening ? "À l'écoute — appuyer pour arrêter" : "Appuyer pour écouter en continu";
+  } else {
+    $("chThemState").textContent = listening ? "Notes en cours — appuyer pour arrêter" : "Appuyer pour prendre des notes";
+  }
+
+  $("tLangThem").textContent = LANGS[S.them].code;
+  $("tLangMe").textContent = LANGS[S.me].code;
+
+  $("pairThem").textContent = LANGS[S.them].code;
+  $("pairMe").textContent   = LANGS[S.me].code;
+  $("mConv").setAttribute("aria-pressed", String(S.mode === "conv"));
+  $("mEar").setAttribute("aria-pressed",  String(S.mode === "ear"));
+  $("mConf").setAttribute("aria-pressed", String(S.mode === "conf"));
+  $("mTexte").setAttribute("aria-pressed", String(S.mode === "text"));
+
+  renderQuickbar();
+  updateTextButtons();
+}
+
+function showBanner(html){
+  const b = $("banner");
+  b.innerHTML = '<button class="bx" aria-label="Fermer">✕</button>' + html;
+  b.classList.add("show");
+  b.querySelector(".bx").onclick = () => b.classList.remove("show");
+}
+
+/* =========================================================
+   11. INTERFACE
+   ========================================================= */
+function setMode(m){
+  if(S.mode === m) return;
+  if(listening) stopListening();
+  S.mode = m; S.active = null;
+  persist();
+  feed.innerHTML = "";
+  S.turns = []; S.bullets = []; S.confLog = []; confBuffer = "";
+  feed.className = m === "conf" ? "bullets" : "";
+  renderControls();
+  renderIntro();
+}
+$("mConv").onclick = () => setMode("conv");
+$("mEar").onclick  = () => setMode("ear");
+$("mConf").onclick = () => {
+  setMode("conf");
+  if(!hasLLM()) showBanner("<b>Ce mode demande un moteur capable de résumer.</b> Claude, ou une clé Google AI Studio gratuite — voir Réglages › Traducteur.");
+};
+$("mTexte").onclick = () => setMode("text");
+$("chThem").onclick = () => startListening("them");
+$("chMe").onclick   = () => startListening("me");
+
+function openSheet(id){ $(id).classList.add("show"); }
+function closeSheet(id){ $(id).classList.remove("show"); }
+document.querySelectorAll(".sheet").forEach(s => {
+  s.addEventListener("click", ev => { if(ev.target === s) s.classList.remove("show"); });
+});
+
+function fillSelects(){
+  const opts = Object.keys(LANGS).map(k => '<option value="' + k + '">' + esc(LANGS[k].label) + "</option>").join("");
+  $("selThem").innerHTML = opts; $("selMe").innerHTML = opts;
+  $("selThem").value = S.them; $("selMe").value = S.me;
+  $("selDomain").innerHTML = Object.keys(DOMAINS).map(k => '<option value="' + k + '">' + esc(DOMAINS[k].label) + "</option>").join("");
+  $("selDomain").value = S.domain;
+  $("selModel").innerHTML = MODELS.map(m => '<option value="' + m.id + '">' + esc(m.label) + "</option>").join("");
+  $("selModel").value = S.model;
+}
+function fillVoiceSelects(){
+  const build = (langKey, current) => {
+    const pool = voicesFor(LANGS[langKey].bcp);
+    if(!pool.length) return '<option value="">aucune voix installée pour ' + esc(LANGS[langKey].code) + "</option>";
+    return '<option value="">Choix automatique</option>' + pool.map(v =>
+      '<option value="' + esc(v.name) + '"' + (v.name === current ? " selected" : "") + ">" + esc(v.name) + " · " + esc(v.lang) + "</option>").join("");
+  };
+  $("selVoiceThem").innerHTML = build(S.me, S.voiceNameMe);
+  $("selVoiceMe").innerHTML   = build(S.them, S.voiceNameThem);
+}
+function refreshVoiceCheck(){
+  const el = $("voiceCheck");
+  if(!el) return;
+  const missing = [];
+  if(!hasVoice(S.them)) missing.push(LANGS[S.them].label.split(" —")[0]);
+  if(!hasVoice(S.me))   missing.push(LANGS[S.me].label.split(" —")[0]);
+  if(!("speechSynthesis" in window)){
+    el.className = "note warn";
+    el.textContent = "Ce navigateur ne lit pas de texte à voix haute. Les traductions s'afficheront seulement à l'écran.";
+  } else if(missing.length){
+    el.className = "note warn";
+    el.innerHTML = "Aucune voix installée pour&nbsp;: <b>" + esc(missing.join(", ")) + "</b>.<br>"
+      + "iPhone / iPad&nbsp;: Réglages › Accessibilité › <i>Lire et énoncer</i> (<i>Contenu énoncé</i> avant iOS 26) › Voix › la langue › télécharger.<br>"
+      + "Android&nbsp;: Réglages › Accessibilité › Synthèse vocale › roue dentée du moteur › Installer les données vocales › la langue. Prenez la voix marquée <i>neural</i> ou <i>naturelle</i>.<br>"
+      + "Windows&nbsp;: Paramètres › Heure et langue › Langue et région › Ajouter une langue, en cochant la synthèse vocale.<br>"
+      + "macOS&nbsp;: Réglages Système › Accessibilité › Contenu énoncé › Voix système › Gérer les voix.";
+  } else {
+    el.className = "note good";
+    el.textContent = "Voix disponibles pour les deux langues.";
+  }
+}
+
+$("pairBtn").onclick = () => { fillSelects(); fillVoiceSelects(); refreshVoiceCheck(); openSheet("sheetLang"); };
+$("selThem").onchange = e => { if(e.target.value === S.me) S.me = S.them; S.them = e.target.value; afterLangChange(); };
+$("selMe").onchange   = e => { if(e.target.value === S.them) S.them = S.me; S.me = e.target.value; afterLangChange(); };
+$("langSwap").onclick = () => { const t = S.them; S.them = S.me; S.me = t; afterLangChange(); };
+function afterLangChange(){
+  fillSelects(); fillVoiceSelects(); refreshVoiceCheck(); renderControls();
+  if(!feed.querySelector(".turn, .bullet")){ feed.innerHTML = ""; renderIntro(); }
+  persist();
+}
+$("langDone").onclick = () => { warmTTS(); closeSheet("sheetLang"); persist(); };
+
+function syncSettings(){
+  fillSelects(); fillVoiceSelects();
+  $("tgHands").setAttribute("aria-pressed", String(S.handsFree));
+  $("tgSrc").setAttribute("aria-pressed", String(S.showSrc));
+  $("tgVoice").setAttribute("aria-pressed", String(S.voice));
+  $("tgProsody").setAttribute("aria-pressed", String(S.prosody));
+  $("tgGate").setAttribute("aria-pressed", String(S.gate));
+  $("tgDense").setAttribute("aria-pressed", String(S.dense));
+  $("tgSpeakBullets").setAttribute("aria-pressed", String(S.speakBullets));
+  $("tgTheme").setAttribute("aria-pressed", String(S.theme === "light"));
+  $("rngRate").value = S.rate;       $("rateVal").textContent = S.rate.toFixed(2).replace(/0$/,"") + "×";
+  $("rngProsody").value = S.prosodyAmt; $("prosVal").textContent = Math.round(S.prosodyAmt * 100) + " %";
+  $("rngGate").value = S.gateDb;     $("gateVal").textContent = S.gateDb + " dB au-dessus du fond";
+  $("rngIval").value = S.confIval;   $("ivalVal").textContent = "toutes les " + S.confIval + " s";
+  $("txtGloss").value = S.gloss;
+  $("txtContext").value = S.context;
+  $("inpKey").value = S.apiKey;
+  $("inpGKey").value = S.geminiKey;
+  $("inpMMail").value = S.mmEmail;
+  $("tgFallback").setAttribute("aria-pressed", String(S.fallback));
+  setLockDesc(S.voiceLock ? ("Voix mémorisée à " + S.voiceLock + " Hz") : "Aucune voix mémorisée");
+  refreshBackendUI();
+  $("diag").innerHTML = diagText();
+}
+function refreshBackendUI(){
+  const el = $("backendState");
+  if(!el) return;
+  const sel = $("selProvider");
+  if(sel){
+    sel.innerHTML = ['<option value="auto">Automatique — le meilleur disponible</option>']
+      .concat(PREF_ORDER.map(k =>
+        '<option value="' + k + '">' + esc(PROVIDERS[k].name)
+        + (available(k) ? "" : " · à configurer") + "</option>")).join("");
+    sel.value = S.provider;
+  }
+  const auto = S.provider === "auto";
+  $("cfgGemini").style.display    = (auto || S.provider === "gemini")    ? "block" : "none";
+  $("cfgChrome").style.display    = (auto || S.provider === "chrome")    ? "block" : "none";
+  $("cfgMM").style.display        = (auto || S.provider === "mymemory")  ? "block" : "none";
+  $("cfgAnthropic").style.display = (S.provider === "anthropic")         ? "block" : "none";
+  $("tgFallback").setAttribute("aria-pressed", String(S.fallback));
+
+  if($("selAnthMode")){
+    $("selAnthMode").value = S.anthMode;
+    $("anthDirect").style.display = S.anthMode === "relay" ? "none" : "block";
+    $("anthRelay").style.display  = S.anthMode === "relay" ? "block" : "none";
+    $("inpRelayUrl").value = S.relayUrl;
+    $("inpRelaySecret").value = S.relaySecret;
+    $("anthModeNote").textContent = BUILT_IN_RELAY_URL
+      ? "Un relais est déjà configuré pour ce lien : si la traduction fonctionne déjà sans rien faire, c'est lui — inutile de toucher à ce réglage, sauf pour utiliser votre propre clé à la place."
+      : "";
+  }
+
+  const label = p => PROVIDERS[p].short + (p === "anthropic" && S.anthMode === "relay" ? " (relais)" : "");
+  const mt = chainFor("mt"), llm = chainFor("llm");
+  if(!mt.length){
+    el.className = "note warn";
+    el.textContent = "Aucun moteur disponible.";
+  } else {
+    el.className = "note good";
+    el.textContent = "Traduction par " + label(mt[0])
+      + (S.fallback && mt.length > 1 ? " — secours : " + mt.slice(1).map(label).join(", ") : "")
+      + ".";
+  }
+  const caps = $("provCaps");
+  caps.className = llm.length ? "note" : "note warn";
+  caps.textContent = llm.length
+    ? "Glossaire imposé, domaine technique, contexte du rendez-vous et mode conférence : actifs."
+    : "Ce moteur ne fait que traduire. Le glossaire, le domaine technique, le contexte et le mode conférence demandent Claude ou une clé Google AI Studio gratuite.";
+  fillGeminiModels();
+  updateChromeNote();
+}
+
+function fillGeminiModels(){
+  const s = $("selGModel");
+  if(!s) return;
+  const list = S.geminiList.length ? S.geminiList : (S.geminiModel ? [S.geminiModel] : ["gemini-2.5-flash"]);
+  s.innerHTML = list.map(m => '<option value="' + esc(m) + '"' + (m === S.geminiModel ? " selected" : "") + ">" + esc(m) + "</option>").join("");
+  if(!S.geminiModel && list.length){ S.geminiModel = list[0]; s.value = list[0]; }
+}
+
+async function updateChromeNote(){
+  const n = $("chromeNote");
+  if(!n) return;
+  if(!("Translator" in self)){
+    n.className = "note warn";
+    n.textContent = "Ce navigateur n'a pas de traducteur intégré. Il existe sur Chrome et Edge, sur ordinateur uniquement — jamais sur téléphone. Il traduit hors ligne, gratuitement, sans que le texte quitte l'appareil.";
+    return;
+  }
+  const a1 = await chromeAvailability(S.them, S.me);
+  const a2 = await chromeAvailability(S.me, S.them);
+  const word = v => v === "available" ? "prête" : v === "downloadable" ? "à télécharger" : v === "downloading" ? "en cours de téléchargement" : "non gérée";
+  const bad = (a1 === "unavailable" || a2 === "unavailable");
+  n.className = bad ? "note warn" : "note good";
+  n.textContent = LANGS[S.them].code + " → " + LANGS[S.me].code + " : " + word(a1)
+                + ".  " + LANGS[S.me].code + " → " + LANGS[S.them].code + " : " + word(a2) + "."
+                + (bad ? " Une paire non gérée bascule automatiquement sur un autre moteur." : "");
+}
+function diagText(){
+  const b = [];
+  b.push(SR_OK ? "Reconnaissance vocale : disponible." : "Reconnaissance vocale : <b>absente de ce navigateur</b>.");
+  b.push("speechSynthesis" in window ? ("Voix installées : " + voices.length + ".") : "Synthèse vocale : absente.");
+  b.push("Analyse micro : " + (mon.on ? "active." : (mon.err || "à la demande.")));
+  const mt = chainFor("mt");
+  const lbl = p => PROVIDERS[p].short + (p === "anthropic" && S.anthMode === "relay" ? " (relais)" : "");
+  b.push("Traducteurs disponibles : " + (mt.length ? mt.map(lbl).join(" → ") : "aucun") + ".");
+  b.push("Résumé et glossaire : " + (hasLLM() ? "actifs." : "indisponibles avec ce moteur."));
+  return b.join("<br>");
+}
+
+$("tgHands").onclick = () => { S.handsFree = !S.handsFree; persist(); syncSettings(); renderQuickbar(); };
+$("tgSrc").onclick   = () => { S.showSrc = !S.showSrc; persist(); syncSettings(); S.turns.forEach(renderTurn); };
+$("tgVoice").onclick = () => { S.voice = !S.voice; if(!S.voice) stopSpeaking(); persist(); syncSettings(); renderQuickbar(); };
+$("tgProsody").onclick = async () => {
+  S.prosody = !S.prosody; persist(); syncSettings();
+  if(S.prosody){ const ok = await startMonitor(); if(!ok){ S.prosody = false; persist(); syncSettings(); showBanner("<b>Analyse micro impossible</b> — " + esc(mon.err || "refusée") + "."); } }
+  else if(!S.gate) stopMonitor();
+};
+$("tgGate").onclick = async () => {
+  S.gate = !S.gate; persist(); syncSettings(); renderQuickbar();
+  if(S.gate){ const ok = await startMonitor(); if(!ok){ S.gate = false; persist(); syncSettings(); renderQuickbar(); showBanner("<b>Analyse micro impossible</b> — " + esc(mon.err || "refusée") + "."); } }
+  else if(!S.prosody) stopMonitor();
+};
+$("tgDense").onclick = () => { S.dense = !S.dense; persist(); syncSettings(); };
+$("tgSpeakBullets").onclick = () => { S.speakBullets = !S.speakBullets; persist(); syncSettings(); };
+$("tgTheme").onclick = () => { S.theme = S.theme === "light" ? "dark" : "light"; document.documentElement.setAttribute("data-theme", S.theme); persist(); syncSettings(); };
+$("rngRate").oninput = e => { S.rate = parseFloat(e.target.value); $("rateVal").textContent = S.rate.toFixed(2).replace(/0$/,"") + "×"; persist(); };
+$("rngProsody").oninput = e => { S.prosodyAmt = parseFloat(e.target.value); $("prosVal").textContent = Math.round(S.prosodyAmt*100) + " %"; persist(); };
+$("rngGate").oninput = e => { S.gateDb = parseFloat(e.target.value); $("gateVal").textContent = S.gateDb + " dB au-dessus du fond"; persist(); };
+$("rngIval").oninput = e => { S.confIval = parseInt(e.target.value,10); $("ivalVal").textContent = "toutes les " + S.confIval + " s"; persist(); if(listening && S.mode === "conf") startConfTimer(); };
+$("txtGloss").oninput = e => { S.gloss = e.target.value; persist(); };
+$("txtContext").oninput = e => { S.context = e.target.value; persist(); };
+$("selDomain").onchange = e => { S.domain = e.target.value; persist(); };
+$("selModel").onchange = e => { S.model = e.target.value; persist(); refreshBackendUI(); };
+$("inpKey").oninput = e => { S.apiKey = e.target.value.trim(); persist(); refreshBackendUI(); };
+$("selAnthMode").onchange = e => { S.anthMode = e.target.value; persist(); refreshBackendUI(); };
+$("inpRelayUrl").oninput = e => { S.relayUrl = e.target.value.trim(); persist(); refreshBackendUI(); };
+$("inpRelaySecret").oninput = e => { S.relaySecret = e.target.value; persist(); };
+$("btnTestRelay").onclick = () => testProvider($("btnTestRelay"), "Tester la connexion", async () => {
+  const r = await anthropicAsk("Réponds exactement: OK", {maxTokens:20});
+  return /ok/i.test(r.text) ? "Connexion établie" : "Réponse inattendue : " + r.text.slice(0,30);
+});
+$("selProvider").onchange = e => { S.provider = e.target.value; persist(); refreshBackendUI(); };
+$("tgFallback").onclick = () => { S.fallback = !S.fallback; persist(); refreshBackendUI(); };
+$("inpMMail").oninput = e => { S.mmEmail = e.target.value.trim(); persist(); };
+$("selGModel").onchange = e => { S.geminiModel = e.target.value; persist(); refreshBackendUI(); };
+
+let gKeyTimer = null;
+$("inpGKey").oninput = e => {
+  S.geminiKey = e.target.value.trim();
+  persist(); refreshBackendUI();
+  clearTimeout(gKeyTimer);
+  if(S.geminiKey.length > 20) gKeyTimer = setTimeout(() => loadGeminiModels(true), 900);
+};
+
+async function loadGeminiModels(silent){
+  const btn = $("btnGModels");
+  if(!silent){ btn.disabled = true; btn.textContent = "Recherche…"; }
+  try{
+    const names = await geminiListModels();
+    if(names.length){
+      S.geminiList = names;
+      if(!S.geminiModel || names.indexOf(S.geminiModel) < 0) S.geminiModel = bestGemini(names);
+      persist(); refreshBackendUI();
+      if(!silent) btn.textContent = names.length + " modèles trouvés";
+    } else if(!silent) btn.textContent = "Aucun modèle utilisable";
+  }catch(e){
+    if(!silent) btn.textContent = errCopy((e && e.code) || "upstream_error", e && e.message);
+  }
+  if(!silent) setTimeout(() => { btn.disabled = false; btn.textContent = "Récupérer la liste des modèles"; }, 3000);
+}
+$("btnGModels").onclick = () => loadGeminiModels(false);
+
+async function testProvider(btn, label, fn){
+  btn.disabled = true; btn.textContent = "Test en cours…";
+  try{ btn.textContent = await fn(); }
+  catch(e){ btn.textContent = errCopy((e && e.code) || "upstream_error", e && e.message); }
+  refreshBackendUI();
+  setTimeout(() => { btn.disabled = false; btn.textContent = label; }, 3200);
+}
+$("btnGTest").onclick = () => testProvider($("btnGTest"), "Tester la connexion", async () => {
+  const r = await geminiAsk("Réponds uniquement par: OK", {maxTokens:20});
+  return /ok/i.test(r.text) ? "Connexion établie" : "Réponse inattendue : " + r.text.slice(0, 30);
+});
+$("btnMMTest").onclick = () => testProvider($("btnMMTest"), "Tester la connexion", async () => {
+  const r = await mmTranslate("Good morning, how are you?", "en", "fr");
+  return "Connexion établie — « " + r.slice(0, 40) + " »";
+});
+$("btnChromeTest").onclick = () => testProvider($("btnChromeTest"), "Vérifier et télécharger les langues", async () => {
+  if(!("Translator" in self)) return "Pas de traducteur dans ce navigateur";
+  const a = await chromeTranslate("Good morning.", S.them, S.me, () => {
+    $("btnChromeTest").textContent = "Téléchargement du modèle…";
+  });
+  return "Prêt — « " + a.slice(0, 40) + " »";
+});
+$("selVoiceThem").onchange = e => { S.voiceNameMe = e.target.value; persist(); };
+$("selVoiceMe").onchange   = e => { S.voiceNameThem = e.target.value; persist(); };
+$("btnLock").onclick = captureVoiceLock;
+
+$("btnTestKey").onclick = async () => {
+  const btn = $("btnTestKey");
+  btn.disabled = true; btn.textContent = "Test en cours…";
+  try{
+    const r = await anthropicAsk("Réponds exactement: OK", {maxTokens:20});
+    btn.textContent = /ok/i.test(r.text) ? "Connexion établie" : "Réponse inattendue";
+    refreshBackendUI();
+  }catch(e){
+    btn.textContent = errCopy((e && e.code) || "upstream_error", e && e.message);
+  }
+  setTimeout(() => { btn.disabled = false; btn.textContent = "Tester la connexion"; }, 3000);
+};
+$("btnMicTest").onclick = async () => {
+  const btn = $("btnMicTest");
+  btn.disabled = true; btn.textContent = "Écoute 4 s — parlez…";
+  const wasProsody = S.prosody, wasGate = S.gate;
+  S.gate = true;
+  const ok = await startMonitor();
+  if(!ok){ btn.textContent = "Micro refusé — " + (mon.err || ""); S.gate = wasGate; S.prosody = wasProsody; setTimeout(()=>{btn.disabled=false;btn.textContent="Tester le micro";},2500); return; }
+  const t0 = now();
+  setTimeout(() => {
+    const a = analyzeWindow(t0, now());
+    if(a && a.ratio > 0.15) btn.textContent = "Voix détectée — f0 ≈ " + Math.round(a.f0Med) + " Hz, " + Math.round(a.ratio*100) + " % du temps";
+    else btn.textContent = "Rien de net capté — rapprochez le micro";
+    S.gate = wasGate; S.prosody = wasProsody;
+    if(!S.gate && !S.prosody) stopMonitor();
+    persist(); syncSettings();
+    setTimeout(() => { btn.disabled = false; btn.textContent = "Tester le micro"; }, 3500);
+  }, 4000);
+};
+
+/* grand écran */
+function openBig(){
+  const last = S.mode === "conf"
+    ? (S.bullets.length ? {trans:S.bullets[S.bullets.length-1].text, src:"", to:S.me, side:"them", pros:null} : null)
+    : [...S.turns].reverse().find(t => t.trans);
+  if(!last) return;
+  $("bigText").textContent = last.trans;
+  $("bigText").style.color = last.side === "them" ? "var(--them)" : "var(--me)";
+  $("bigSrc").textContent = last.src || "";
+  $("bigReplay").onclick = () => { stopSpeaking(); say(last.trans, last.to, last.pros); };
+  $("big").classList.add("show");
+}
+$("bigClose").onclick = () => $("big").classList.remove("show");
+
+/* transcription */
+function transcript(){
+  const out = [];
+  if(S.turns.length){
+    out.push(S.turns.filter(t => t.trans).map(t =>
+      (t.side === "them" ? "INTERLOCUTEUR" : "MOI") + " [" + LANGS[t.from].code + "] " + t.src
+      + "\n           [" + LANGS[t.to].code + "] " + t.trans).join("\n\n"));
+  }
+  if(S.bullets.length){
+    out.push("NOTES\n" + S.bullets.map(b => "- " + b.text).join("\n"));
+  }
+  if(S.summary) out.push("RÉSUMÉ\n" + S.summary);
+  return out.join("\n\n\n");
+}
+async function saveText(name, txt){
+  if(downloadsFn){ try{ await downloadsFn.save({filename:name, data:txt}); return true; }catch(e){} }
+  try{
+    const b = new Blob([txt], {type:"text/plain;charset=utf-8"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    return true;
+  }catch(e){ return false; }
+}
+async function copyTranscript(){
+  const txt = transcript();
+  if(!txt) return;
+  try{ await navigator.clipboard.writeText(txt); showBanner("<b>Transcription copiée.</b>"); }
+  catch(e){ showBanner("<b>Copie refusée par le navigateur.</b> Utilisez « Enregistrer » dans les réglages."); }
+}
+$("btnCopy").onclick = copyTranscript;
+$("btnSave").onclick = async () => {
+  const txt = transcript(); if(!txt) return;
+  const d = new Date();
+  const stamp = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0")
+              + "_" + String(d.getHours()).padStart(2,"0") + "h" + String(d.getMinutes()).padStart(2,"0");
+  const ok = await saveText("conversation_" + stamp + ".txt", txt);
+  $("btnSave").textContent = ok ? "Enregistré" : "Enregistrement refusé";
+  setTimeout(() => $("btnSave").textContent = "Enregistrer la transcription", 2500);
+};
+$("btnClear").onclick = () => {
+  S.turns = []; S.bullets = []; S.confLog = []; S.summary = ""; confBuffer = "";
+  queue.length = 0;
+  feed.innerHTML = ""; renderIntro();
+  closeSheet("sheetSet");
+};
+$("setDone").onclick = () => closeSheet("sheetSet");
+
+/* clavier */
+document.addEventListener("keydown", ev => {
+  const tag = ev.target.tagName;
+  if(tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA") return;
+  if(S.mode === "text") return;
+  if(ev.code === "Space"){ ev.preventDefault(); listening ? stopListening() : startListening(S.mode === "conv" ? "them" : "them"); }
+  if(ev.key === "1") startListening("them");
+  if(ev.key === "2" && S.mode === "conv") startListening("me");
+  if(ev.key === "Escape"){
+    $("big").classList.remove("show");
+    document.querySelectorAll(".sheet").forEach(s => s.classList.remove("show"));
+  }
+});
+
+/* =========================================================
+   12. DÉMARRAGE
+   ========================================================= */
+restore();
+refreshBackendUI();
+fillSelects();
+fillVoiceSelects();
+feed.className = S.mode === "conf" ? "bullets" : "";
+renderControls();
+renderIntro();
+initTextInputs();
+
+if(!SR_OK){
+  $("chThem").disabled = true; $("chMe").disabled = true;
+  showBanner("<b>Ce navigateur ne reconnaît pas la parole.</b> Utilisez Chrome sur Android, Windows, macOS ou Linux, ou Safari sur iPhone et iPad. Firefox n'a pas encore cette fonction.");
+}
+if(!store.get("seen", false)){
+  setTimeout(() => { fillSelects(); refreshVoiceCheck(); openSheet("sheetLang"); store.set("seen", true); }, 400);
+}
+
+/* hors de Claude : installation comme application */
+if(!window.claude && "serviceWorker" in navigator && location.protocol === "https:"){
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+
+</script>
+</body>
+</html>
