@@ -145,8 +145,11 @@ footer{padding:9px var(--pad) 13px;border-top:1px solid var(--line-soft);backgro
 .qb.warn{border-color:var(--live);color:var(--live)}
 .channels{display:grid;gap:9px}
 .channels.two{grid-template-columns:1fr 1fr}
+.channels.ear-two{grid-template-columns:1fr 1fr}
 .ch{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:13px 14px 11px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--bg-raise);min-height:82px}
 .channels:not(.two) .ch{min-height:68px}
+.ch-internal .ch-lang{color:var(--ok)}
+.ch-internal[aria-pressed="true"]{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
 .ch-role{font-size:13px;color:var(--text-dim)}
 .ch-lang{font-size:25px;font-weight:600;line-height:1.05}
 .ch-state{font-size:12.5px;color:var(--text-faint);margin-top:auto}
@@ -233,6 +236,11 @@ input[type=range]{width:120px;accent-color:var(--them);flex:none}
         <span class="ch-role">Moi</span>
         <span class="ch-lang" id="chMeLang">FR</span>
         <span class="ch-state" id="chMeState">Appuyer pour parler</span>
+      </button>
+      <button class="ch ch-internal" id="chInternal" aria-pressed="false" style="display:none">
+        <span class="ch-role">Audio de l’appareil</span>
+        <span class="ch-lang">En interne</span>
+        <span class="ch-state" id="chInternalState">Partager l’audio à écouter</span>
       </button>
     </div>
     <div id="textBar">
@@ -1167,9 +1175,219 @@ const SR_OK = !!SR;
 let rec = null, listening = false, suspended = false;
 let lastInterim = "", utterT0 = 0, silenceTimer = null, restartTimer = null, restartAt = 0;
 
+/* Capture audio interne (onglet / fenêtre / écran) → PCM 16 kHz → Gemini Live Transcription. */
+let internalListening = false;
+const internal = {stream:null, ctx:null, source:null, processor:null, gain:null, ws:null, sampleRate:0, carry:null, audioReady:false, closedByUser:false};
+
 function sideOf(side){
   return side === "them" ? {from:S.them, to:S.me} : {from:S.me, to:S.them};
 }
+
+function internalErrorMessage(e){
+  const name = e && e.name || "";
+  if(name === "NotAllowedError") return "Partage audio refusé";
+  if(name === "NotFoundError") return "Aucune source audio disponible";
+  if(name === "NotReadableError") return "La source audio ne peut pas être capturée";
+  if(name === "InvalidStateError") return "Cliquez directement sur « En interne » pour lancer la capture";
+  if(name === "NotSupportedError") return "Capture audio interne non prise en charge par ce navigateur";
+  if(name === "TypeError") return "Capture audio interne non prise en charge ici";
+  return (e && e.message) || "Capture audio interne impossible";
+}
+
+function floatTo16BitBase64(input){
+  const out = new Int16Array(input.length);
+  for(let i=0;i<input.length;i++){
+    const v = clamp(input[i], -1, 1);
+    out[i] = v < 0 ? Math.round(v * 32768) : Math.round(v * 32767);
+  }
+  const bytes = new Uint8Array(out.buffer);
+  let bin = "";
+  const step = 0x8000;
+  for(let i=0;i<bytes.length;i+=step) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + step));
+  return btoa(bin);
+}
+
+function downsample16k(input, fromRate){
+  if(fromRate === 16000) return input;
+  const ratio = fromRate / 16000;
+  const outLen = Math.max(1, Math.floor(input.length / ratio));
+  const out = new Float32Array(outLen);
+  let offset = 0;
+  for(let i=0;i<outLen;i++){
+    const next = Math.min(input.length, Math.floor((i + 1) * ratio));
+    let sum = 0, count = 0;
+    for(let j=offset;j<next;j++){ sum += input[j]; count++; }
+    out[i] = count ? sum / count : 0;
+    offset = next;
+  }
+  return out;
+}
+
+function customVocab(){
+  return glossaryLines().map(x => x.split(" = ")[0].trim()).filter(Boolean).slice(0,100);
+}
+
+function closeInternalSocket(){
+  const ws = internal.ws;
+  internal.ws = null;
+  if(ws){ try{ ws.close(); }catch(e){} }
+}
+
+function stopInternalStreamTracks(){
+  if(internal.stream){ try{ internal.stream.getTracks().forEach(t => t.stop()); }catch(e){} }
+  internal.stream = null;
+  if(internal.processor){ try{ internal.processor.disconnect(); }catch(e){} }
+  if(internal.source){ try{ internal.source.disconnect(); }catch(e){} }
+  if(internal.gain){ try{ internal.gain.disconnect(); }catch(e){} }
+  internal.processor = null; internal.source = null; internal.gain = null;
+  if(internal.ctx){ try{ internal.ctx.close(); }catch(e){} }
+  internal.ctx = null; internal.sampleRate = 0; internal.carry = null;
+}
+
+function internalSetupMessage(){
+  const cfg = {
+    responseModalities:["TEXT"],
+    inputAudioTranscription:{
+      languageCodes:[LANGS[S.them].bcp],
+      mode:"SMART"
+    }
+  };
+  const vocab = customVocab();
+  if(vocab.length) cfg.inputAudioTranscription.customVocabulary = vocab;
+  return {setup:{model:"models/gemini-3.5-transcribe-live",generationConfig:{responseModalities:["TEXT"]},inputAudioTranscription:cfg.inputAudioTranscription}};
+}
+
+function internalWsUrl(){
+  return "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key="
+       + encodeURIComponent(S.geminiKey.trim());
+}
+
+async function startInternalListening(){
+  if(internalListening){ stopInternalListening(); return; }
+  if(!S.geminiKey.trim() || S.geminiKey.trim().length <= 10){
+    syncSettings();
+    showBanner("<b>En interne demande une clé Google AI Studio.</b> Ajoutez-la dans Réglages › Traducteur › Gemini.");
+    return;
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+    showBanner("<b>Capture audio interne non disponible.</b> Ce navigateur ne fournit pas l’API de partage d’écran avec audio.");
+    return;
+  }
+
+  stopListening();
+  stopSpeaking();
+  internal.closedByUser = false;
+  renderControls();
+  setStatus("busy", "Connexion…");
+
+  let stream = null, ctx = null;
+  try{
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video:true,
+      audio:true,
+      systemAudio:"include",
+      windowAudio:"system",
+      selfBrowserSurface:"exclude",
+      surfaceSwitching:"include",
+      preferCurrentTab:false,
+      monitorTypeSurfaces:"include"
+    });
+    const audioTracks = stream.getAudioTracks();
+    if(!audioTracks.length) throw {code:"no_audio_track", message:"Aucune piste audio n’a été partagée. Dans le sélecteur, choisissez une source avec son et cochez le partage audio si proposé."};
+
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) throw {name:"NotSupportedError", message:"AudioContext absent"};
+    ctx = new AC();
+    if(ctx.state === "suspended"){ try{ await ctx.resume(); }catch(e){} }
+
+    const ws = new WebSocket(internalWsUrl());
+    internal.ws = ws;
+    internal.stream = stream; internal.ctx = ctx; internal.sampleRate = ctx.sampleRate;
+    internal.carry = null; internal.audioReady = false;
+
+    ws.onmessage = ev => {
+      let msg; try{ msg = JSON.parse(ev.data); }catch(e){ return; }
+      const content = msg.serverContent;
+      if(!content) return;
+      const interim = content.interimInputTranscription && content.interimInputTranscription.text;
+      const finalText = content.inputTranscription && content.inputTranscription.text;
+      if(interim) setLive(interim);
+      if(finalText && finalText.trim()){
+        utterT0 = now();
+        onUtterance(finalText);
+        setLive("");
+      }
+      if(msg.error){
+        stopInternalListening(true);
+        showBanner("<b>Gemini Live :</b> " + esc(msg.error.message || "erreur de transcription") + ".");
+      }
+    };
+
+    stream.getVideoTracks().forEach(t => t.addEventListener("ended", () => { if(internalListening) stopInternalListening(true); }));
+    audioTracks.forEach(t => t.addEventListener("ended", () => { if(internalListening) stopInternalListening(true); }));
+
+    await new Promise((resolve,reject) => {
+      let settled = false;
+      const done = (fn, val) => { if(settled) return; settled = true; fn(val); };
+      ws.onopen = () => {
+        try{ ws.send(JSON.stringify(internalSetupMessage())); }catch(e){ done(reject,e); return; }
+        done(resolve);
+      };
+      ws.onerror = () => done(reject, {message:"Connexion Gemini Live impossible"});
+      ws.onclose = ev => { if(!settled) done(reject,{message:"Connexion Gemini Live fermée"}); else if(internalListening && !internal.closedByUser) stopInternalListening(true); };
+    });
+
+    const source = ctx.createMediaStreamSource(new MediaStream(audioTracks));
+    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    source.connect(proc); proc.connect(gain); gain.connect(ctx.destination);
+    internal.source = source; internal.processor = proc; internal.gain = gain;
+
+    proc.onaudioprocess = ev => {
+      if(!internalListening || !internal.ws || internal.ws.readyState !== WebSocket.OPEN) return;
+      const input = ev.inputBuffer.getChannelData(0);
+      const ds = downsample16k(input, internal.sampleRate);
+      if(!ds.length) return;
+      try{
+        internal.ws.send(JSON.stringify({realtimeInput:{audio:{data:floatTo16BitBase64(ds),mimeType:"audio/pcm;rate=16000"}}}));
+      }catch(e){}
+    };
+
+    internalListening = true;
+    renderControls();
+    $("live").classList.add("show");
+    setLive("");
+    setStatus("on", "En interne");
+  }catch(e){
+    internal.closedByUser = true;
+    closeInternalSocket();
+    stopInternalStreamTracks();
+    internalListening = false;
+    renderControls();
+    setStatus("", "Prêt");
+    const msg = e && e.code === "no_audio_track" ? e.message : internalErrorMessage(e);
+    showBanner("<b>En interne :</b> " + esc(msg) + ".");
+  }
+}
+
+function stopInternalListening(fromEnded){
+  if(!internalListening && !internal.stream && !internal.ws) return;
+  internal.closedByUser = !fromEnded;
+  if(internal.ws && internal.ws.readyState === WebSocket.OPEN){
+    try{ internal.ws.send(JSON.stringify({realtimeInput:{audioStreamEnd:true}})); }catch(e){}
+  }
+  closeInternalSocket();
+  stopInternalStreamTracks();
+  internalListening = false;
+  if(!listening){
+    $("live").classList.remove("show");
+    setStatus("", "Prêt");
+  }
+  renderControls();
+  if(fromEnded) showBanner("<b>En interne arrêté :</b> la source audio partagée a été fermée.");
+}
+
 function activeSide(){ return S.mode === "conv" ? (S.active || "them") : "them"; }
 
 function buildRec(langKey){
@@ -1230,6 +1448,7 @@ function armSilence(){
 async function startListening(side){
   if(!SR_OK) return;
   warmTTS();
+  if(internalListening) stopInternalListening();
   if(S.mode !== "conv") side = "them";
   if(listening && S.active === side){ stopListening(); return; }
   stopSpeaking();
@@ -1275,6 +1494,7 @@ function resumeRecognition(){
   setStatus("on", listeningLabel());
 }
 function listeningLabel(){
+  if(internalListening) return "En interne";
   if(S.mode === "conf") return "Prise de notes";
   if(S.mode === "ear")  return "À l'écoute";
   return S.active === "them" ? "À l'écoute" : "Parlez";
@@ -1283,7 +1503,8 @@ function setLive(txt){
   if(!$("live").classList.contains("show")) return;
   const el = $("liveTxt");
   if(txt && txt.trim()){ el.innerHTML = "<span>" + esc(txt) + "</span>"; return; }
-  if(S.mode === "conf") el.textContent = "Notes en cours — " + S.confLog.length + " passage(s) captés";
+  if(internalListening) el.textContent = "Capture audio de l’appareil — transcription en " + LANGS[S.them].code + "…";
+  else if(S.mode === "conf") el.textContent = "Notes en cours — " + S.confLog.length + " passage(s) captés";
   else if(S.mode === "ear") el.textContent = "En attente de parole en " + LANGS[S.them].code + "…";
   else el.textContent = (S.active === "them" ? "En attente de parole…" : "À vous…");
 }
@@ -1751,7 +1972,9 @@ function renderIntro(){
     d.innerHTML = "<h2>Oreillette</h2><ul>"
       + "<li>Un écouteur dans <b>votre</b> oreille, le téléphone dans la poche ou en main.</li>"
       + "<li>L'appli n'écoute que le " + esc(LANGS[S.them].code) + " et ne vous parle qu'en " + esc(LANGS[S.me].code) + ".</li>"
-      + "<li>Ce que vous dites, vous, est ignoré.</li></ul>"
+      + "<li>Ce que vous dites, vous, est ignoré.</li>"
+      + "<li><b>En interne</b> capte l'audio d'un onglet, d'une fenêtre ou de l'écran partagé, puis le traduit dans votre oreillette.</li></ul>"
+      + '<div class="hint">Sur ordinateur, choisissez la source qui diffuse le son et partagez son audio. Sur téléphone, cette capture dépend des possibilités du navigateur et ne peut pas intercepter directement le son d’un appel cellulaire natif.</div>'
       + '<div class="hint">Pour que l\'autre personne vous entende aussi dans sa langue&nbsp;: envoyez-lui ce même lien. Sur son téléphone, elle inverse les deux langues et met son propre écouteur. Les deux appareils travaillent chacun de leur côté, sans rien avoir à connecter.</div>';
   } else {
     d.innerHTML = "<h2>Conférence</h2><ul>"
@@ -1866,13 +2089,16 @@ function initTextInputs(){
 function renderControls(){
   const isText = S.mode === "text";
   const two = S.mode === "conv";
+  const ear = S.mode === "ear";
 
-  $("channels").className = "channels" + (two ? " two" : "") + (isText ? " texte-hidden" : "");
+  $("channels").className = "channels" + (two ? " two" : "") + (ear ? " ear-two" : "") + (isText ? " texte-hidden" : "");
   $("chMe").style.display = two ? "" : "none";
+  $("chInternal").style.display = ear ? "" : "none";
   $("textBar").classList.toggle("show", isText);
 
-  $("chThem").setAttribute("aria-pressed", String(!isText && listening && (two ? S.active === "them" : true)));
+  $("chThem").setAttribute("aria-pressed", String(!isText && (internalListening ? false : listening && (two ? S.active === "them" : true))));
   $("chMe").setAttribute("aria-pressed", String(!isText && listening && S.active === "me"));
+  $("chInternal").setAttribute("aria-pressed", String(ear && internalListening));
   $("chThemLang").textContent = two ? LANGS[S.them].code : (LANGS[S.them].code + " → " + LANGS[S.me].code);
   $("chMeLang").textContent = LANGS[S.me].code;
   $("chThemRole").textContent = S.mode === "conf" ? "Orateur" : "Interlocuteur";
@@ -1882,6 +2108,7 @@ function renderControls(){
     $("chMeState").textContent   = (listening && S.active === "me")   ? "Micro ouvert — appuyer pour arrêter" : "Appuyer pour parler";
   } else if(S.mode === "ear"){
     $("chThemState").textContent = listening ? "À l'écoute — appuyer pour arrêter" : "Appuyer pour écouter en continu";
+    $("chInternalState").textContent = internalListening ? "Capture audio — appuyer pour arrêter" : "Partager l’audio à écouter";
   } else {
     $("chThemState").textContent = listening ? "Notes en cours — appuyer pour arrêter" : "Appuyer pour prendre des notes";
   }
@@ -1913,6 +2140,7 @@ function showBanner(html){
 function setMode(m){
   if(S.mode === m) return;
   if(listening) stopListening();
+  if(internalListening) stopInternalListening();
   S.mode = m; S.active = null;
   persist();
   feed.innerHTML = "";
@@ -1930,6 +2158,7 @@ $("mConf").onclick = () => {
 $("mTexte").onclick = () => setMode("text");
 $("chThem").onclick = () => startListening("them");
 $("chMe").onclick   = () => startListening("me");
+$("chInternal").onclick = () => startInternalListening();
 
 function openSheet(id){ $(id).classList.add("show"); }
 function closeSheet(id){ $(id).classList.remove("show"); }
@@ -2092,6 +2321,7 @@ function diagText(){
   b.push(SR_OK ? "Reconnaissance vocale : disponible." : "Reconnaissance vocale : <b>absente de ce navigateur</b>.");
   b.push("speechSynthesis" in window ? ("Voix installées : " + voices.length + ".") : "Synthèse vocale : absente.");
   b.push("Analyse micro : " + (mon.on ? "active." : (mon.err || "à la demande.")));
+  b.push("Audio interne : " + (internalListening ? "actif." : (S.geminiKey ? "prêt avec Gemini." : "clé Gemini à configurer.")));
   const mt = chainFor("mt");
   const lbl = p => PROVIDERS[p].short + (p === "anthropic" && S.anthMode === "relay" ? " (relais)" : "");
   b.push("Traducteurs disponibles : " + (mt.length ? mt.map(lbl).join(" → ") : "aucun") + ".");
@@ -2287,7 +2517,12 @@ document.addEventListener("keydown", ev => {
   const tag = ev.target.tagName;
   if(tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA") return;
   if(S.mode === "text") return;
-  if(ev.code === "Space"){ ev.preventDefault(); listening ? stopListening() : startListening(S.mode === "conv" ? "them" : "them"); }
+  if(ev.code === "Space"){
+    ev.preventDefault();
+    if(internalListening) stopInternalListening();
+    else if(listening) stopListening();
+    else startListening(S.mode === "conv" ? "them" : "them");
+  }
   if(ev.key === "1") startListening("them");
   if(ev.key === "2" && S.mode === "conv") startListening("me");
   if(ev.key === "Escape"){
