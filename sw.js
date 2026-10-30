@@ -1,8 +1,8 @@
 /* Interprète — service worker.
    Met en cache la coquille de l'application pour qu'elle s'ouvre sans réseau.
    La traduction, elle, exige toujours une connexion. */
-const CACHE = "interprete-v1";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
+const CACHE = "interprete-v2";
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png", "./icon-maskable.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

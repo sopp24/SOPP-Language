@@ -33,7 +33,7 @@ Vous n'avez besoin ni de git, ni de ligne de commande. Tout se fait depuis le si
 3. Nommez-le, par exemple `interprete`. Laissez-le sur **Public** — l'hébergement de pages depuis un dépôt privé demande un compte payant. Le dépôt ne contient aucune donnée personnelle et jamais votre clé API : elle ne sera tapée que dans le navigateur, au moment de l'usage.
 4. Cochez rien d'autre, cliquez **Create repository**.
 5. Sur la page du dépôt vide, cliquez **uploading an existing file**.
-6. Glissez-y **tous les fichiers de ce dossier** : `index.html`, `manifest.webmanifest`, `sw.js`, `robots.txt`, `icon-192.png`, `icon-512.png`, `icon-maskable.png`, `apple-touch-icon.png`.
+6. Glissez-y **tous les fichiers de ce dossier** : `index.html`, `manifest.webmanifest`, `sw.js`, `robots.txt`, `.nojekyll`, `icon-192.png`, `icon-512.png`, `icon-maskable.png`, `apple-touch-icon.png`. Le dossier `cloudflare-relay/` contient le code source du relais facultatif, à déployer séparément chez Cloudflare.
 7. Tout en bas, cliquez **Commit changes**.
 8. Onglet **Settings** du dépôt, puis **Pages** dans la colonne de gauche.
 9. Sous *Build and deployment* → *Source*, choisissez **Deploy from a branch**. Juste en dessous : branche **main**, dossier **/ (root)**. Cliquez **Save**.
@@ -47,7 +47,7 @@ C'est ce lien que vous ouvrez sur vos téléphones. Il ne changera plus.
 
 ### Le fichier `.nojekyll`
 
-Il est fourni mais facultatif ici. Si votre système d'exploitation refuse de vous laisser glisser un fichier dont le nom commence par un point, ignorez-le : rien ne cassera. Si vous y tenez, dans le dépôt : **Add file → Create new file**, tapez `.nojekyll` comme nom, laissez vide, validez.
+Le dépôt contient ce fichier vide sous le bon nom. Il demande à GitHub Pages de servir directement les fichiers statiques sans traitement Jekyll. Conservez-le à la racine du dépôt.
 
 ### Le mettre sur l'écran d'accueil
 
@@ -208,7 +208,7 @@ Ce qu'il arrête, en pratique : les robots qui scrutent le web à la recherche d
 
 Le principe — un petit serveur qui garde la clé et que l'appli appelle à sa place — fonctionne identiquement avec des fonctions Vercel, des fonctions Netlify, ou tout hébergeur qui exécute du code à la demande. Le fichier `cloudflare-relay/worker.js` est volontairement écrit en JavaScript standard, sans rien de propre à Cloudflare dans sa logique : l'adapter demande de changer la manière dont `env.ANTHROPIC_API_KEY` est lue (une variable d'environnement classique partout) et la façon dont la fonction est déclarée, pas la logique elle-même.
 
-## 4. Les trois modes
+## 4. Les cinq modes
 
 ### Conversation — le téléphone entre vous deux
 
@@ -225,6 +225,8 @@ C'est la réponse au problème des deux écouteurs. Un téléphone ne peut pas e
 
 Chacun entend sa langue, discrètement, et personne n'a rien à appairer.
 
+Le bouton de partage de l'en-tête prépare un lien avec les deux langues inversées. Sur ordinateur, il copie le lien ; sur téléphone, il ouvre le menu de partage natif. La personne qui le reçoit arrive donc directement dans le sens de traduction qui lui convient.
+
 **Le point délicat, à savoir avant d'essayer :** si vous utilisez un casque Bluetooth avec micro, le navigateur prendra sans doute le micro du casque — donc votre bouche, pas celle d'en face. Utilisez plutôt un écouteur **sans micro**, ou des écouteurs filaires simples, pour que le téléphone continue d'écouter la pièce avec son propre micro.
 
 ### Conférence — des notes en puces
@@ -234,6 +236,23 @@ L'appli écoute en continu et écrit les idées clés sous forme de puces dans v
 Le bouton **Résumé complet** rédige à la fin une synthèse structurée : sujet, points clés, chiffres, décisions, questions ouvertes.
 
 Ce mode demande un moteur capable de raisonner : **Claude ou Gemini**. MyMemory et le traducteur du navigateur ne savent que traduire phrase à phrase, ils ne peuvent pas synthétiser.
+
+### Texte — traduction au clavier
+
+Les deux zones de saisie permettent d'écrire soit dans la langue de l'interlocuteur, soit dans la vôtre. Le message traduit apparaît dans la discussion, avec le texte d'origine lorsque cette option est activée. Chaque bulle traduite dispose d'une commande de copie.
+
+### Documents — photos et fichiers
+
+Les commandes fixes en bas de l'écran permettent de prendre une photo ou de choisir un fichier. Le texte est extrait dans le navigateur, puis traduit avec le moteur sélectionné dans les réglages.
+
+- **Photos et images** : l'OCR reconnaît les paragraphes ou groupes de texte. L'original apparaît en bleu et la traduction en jaune. Une phrase sélectionnée est mise en évidence dans les deux bulles.
+- **PDF** : le texte sélectionnable est extrait directement ; les pages scannées passent par l'OCR. La discussion présente le texte original puis la traduction. Le PDF téléchargé est un document textuel traduit, sans les illustrations de l'original.
+- **Word DOCX et PowerPoint PPTX** : le texte des paragraphes et diapositives est remplacé dans une copie du fichier, ce qui conserve la structure et les éléments graphiques du document.
+- **Fichiers TXT, Markdown et RTF** : les balises et commandes de mise en forme sont retirées avant traduction ; le résultat est téléchargeable en TXT.
+
+Les anciens formats binaires DOC et PPT doivent être convertis en DOCX et PPTX. Pour les autres images, la lecture dépend aussi des formats que le navigateur ou le convertisseur intégré sait décoder.
+
+Le bouton de langue dans l'en-tête ouvre les langues du document lorsque cet onglet est actif. Les historiques de discussion de chaque onglet restent présents pendant que l'application est ouverte ; ils ne sont pas synchronisés ni sauvegardés sur un serveur.
 
 ---
 
@@ -339,8 +358,9 @@ Ce que ça ne fait pas, et ne peut pas faire depuis un navigateur : **reproduire
   - *MyMemory* : le texte part chez `api.mymemory.translated.net`. Le service alimente une mémoire de traduction communautaire — considérez que ce que vous envoyez peut y être conservé.
   - *Gemini* : le texte part chez Google, qui indique pouvoir s'en servir pour améliorer ses produits sur l'offre gratuite.
   - *Anthropic* : le texte part chez Anthropic, sans réutilisation pour l'entraînement.
-- **Rien n'est envoyé ailleurs.** Aucune analyse d'audience, aucun traceur, aucun serveur intermédiaire. La page n'appelle que le moteur choisi et Google Fonts.
-- Les transcriptions ne quittent jamais l'appareil, et disparaissent quand vous fermez l'onglet, sauf si vous les enregistrez vous-même. Vos réglages, glossaires et clé restent dans le stockage local du navigateur.
+- Aucun fichier original n'est envoyé à un serveur de l'application. Les images, PDF et fichiers Office sont lus dans le navigateur ; les outils d'extraction et d'OCR sont chargés depuis leurs bibliothèques/CDN. Le **texte extrait** est ensuite transmis au moteur de traduction choisi, sauf avec le traducteur intégré au navigateur qui traite le texte localement.
+- Il n'y a pas d'analyse d'audience ni de traceur. La page contacte le moteur choisi, les polices et les CDN nécessaires au traitement des documents.
+- Les transcriptions et les résultats de documents restent en mémoire dans l'onglet et disparaissent à sa fermeture ou au rechargement. Les réglages, glossaires et clés restent dans le stockage local du navigateur.
 
 Dans un cadre professionnel sensible — santé, défense, secret des affaires — vérifiez que ce trajet est compatible avec vos obligations avant d'utiliser l'outil en réunion réelle.
 
@@ -355,7 +375,7 @@ sw.js                           met l'interface en cache pour un démarrage inst
 robots.txt                      interdit l'indexation
 icon-*.png                      icônes de l'application
 .nojekyll                       facultatif, désactive le traitement Jekyll de GitHub
-cloudflare-relay/worker.js      facultatif — le relais qui garde une clé Anthropic partagée hors de la page, voir §3bis
+cloudflare-relay/worker.js      source du relais Cloudflare facultatif pour une clé Anthropic partagée, voir §3bis
 ```
 
-Tout tient dans `index.html`. Vous pouvez le modifier directement : il n'y a ni dépendance, ni étape de compilation. Le dossier `cloudflare-relay/` ne va pas sur GitHub Pages — il se colle dans l'éditeur Cloudflare, comme expliqué au §3bis. Ne le publiez pas comme fichier statique : ce n'est pas nécessaire et il n'a rien à y faire.
+Toute l'interface reste dans `index.html` : aucun outil de compilation n'est nécessaire. Le fichier `cloudflare-relay/worker.js` est un **code source** à copier dans l'éditeur Cloudflare pour déployer le relais ; GitHub Pages ne l'exécute pas. Il ne contient aucune clé secrète.
