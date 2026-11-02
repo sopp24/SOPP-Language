@@ -53,8 +53,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 
 header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bottom:1px solid var(--line-soft);background:var(--bg);flex:none}
-#pairBtn{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;margin-left:-10px}
+#pairBtn{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;margin-left:-10px;flex:none}
 #pairBtn:hover{background:var(--bg-raise)}
+#swapLangBtn{display:flex;align-items:center;justify-content:center;gap:6px;flex:none;min-width:36px;min-height:36px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;color:var(--text-dim);font-size:13px;white-space:nowrap}
+#swapLangBtn:hover{background:var(--bg-raise);color:var(--text)}
+#swapLangBtn:active{transform:scale(.96)}
+#swapLangBtn .swap-icon{font-size:17px;line-height:1}
 #shareBtnDesktop,#shareBtnMobile{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;border-radius:10px;border:1px solid var(--line);color:var(--text-dim);font-size:13px;white-space:nowrap}
 #shareBtnDesktop:hover,#shareBtnMobile:hover{background:var(--bg-raise);color:var(--text)}
 #shareBtnMobile{display:none}
@@ -72,6 +76,13 @@ header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bo
   #shareBtnDesktop{display:none}
   #shareBtnMobile{display:flex}
 }
+@media (max-width:520px){
+  header{gap:6px}
+  #pairBtn{gap:6px;padding:6px 7px;margin-left:-7px}
+  #swapLangBtn{width:36px;padding:5px}
+  #swapLangBtn .swap-label{display:none}
+}
+
 
 /* ==========================================================
    TRADUCTION DE DOCUMENTS — ajout indépendant
@@ -114,6 +125,7 @@ header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bo
   .mode small{display:none}
   #hdrStatus{font-size:11px;gap:5px}
   #shareBtnMobile{padding:7px 8px;font-size:12px}
+  #shareBtnMobile span{display:none}
 }
 
 #modes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:8px var(--pad);background:var(--bg);flex:none}
@@ -300,6 +312,10 @@ input[type=range]{width:120px;accent-color:var(--them);flex:none}
       <span class="pair-arrow">⇄</span>
       <span class="pair-code pair-me" id="pairMe">FR</span>
       <span class="pair-caret">▾</span>
+    </button>
+    <button id="swapLangBtn" type="button" aria-label="Inverser les deux langues" title="Inverser les deux langues">
+      <span class="swap-icon" aria-hidden="true">⇄</span>
+      <span class="swap-label">Inverser</span>
     </button>
     <button id="shareBtnDesktop" type="button" aria-label="Copier le lien avec les langues inversées">↗ <span>Copier le lien</span></button>
     <button id="shareBtnMobile" type="button" aria-label="Partager le lien avec les langues inversées">↗ <span>Partager</span></button>
@@ -3168,7 +3184,14 @@ function refreshVoiceCheck(){
 $("pairBtn").onclick = () => { if(S.mode==="docs"){openDocSheet();return;} fillSelects(); fillVoiceSelects(); refreshVoiceCheck(); openSheet("sheetLang"); };
 $("selThem").onchange = e => { if(e.target.value === S.me) S.me = S.them; S.them = e.target.value; afterLangChange(); };
 $("selMe").onchange   = e => { if(e.target.value === S.them) S.them = S.me; S.me = e.target.value; afterLangChange(); };
-$("langSwap").onclick = () => { const t = S.them; S.them = S.me; S.me = t; afterLangChange(); };
+function swapLanguages(){
+  const previousThem=S.them;
+  S.them=S.me;
+  S.me=previousThem;
+  afterLangChange();
+}
+$("langSwap").onclick=swapLanguages;
+$("swapLangBtn").onclick=swapLanguages;
 
 function buildInvertedShareUrl(){
   const u = new URL(window.location.href);
