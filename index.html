@@ -3291,7 +3291,8 @@ async function docRenderPdfPage(pdf,n){
   const page=await pdf.getPage(n),base=page.getViewport({scale:1.5}),scale=Math.min(1.7,2200/base.width),viewport=page.getViewport({scale});
   const canvas=document.createElement("canvas");canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
   await page.render({canvasContext:canvas.getContext("2d"),viewport}).promise;
-  const pageSize=page.getViewport({scale:1});
+  /* PDF.js exprime la viewport en pixels CSS (96 dpi) : 0.75 ramène les dimensions en points PDF (72 dpi). */
+  const pageSize=page.getViewport({scale:.75});
   return {canvas,viewport,width:pageSize.width,height:pageSize.height};
 }
 async function docBuildVisualPdf(pages){
