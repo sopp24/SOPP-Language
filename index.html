@@ -104,7 +104,7 @@ header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bo
 #docStatus{min-height:22px}
 #docPreview{display:none}
 .doc-preview-card,.doc-page-wrap,.doc-card-pad,.doc-meta{display:none}
-#docDownload{display:none}
+#docDownload,#docDownloadText{display:none}
 .doc-mode-intro{width:100%;margin:auto 0;padding:6px 0 34px;color:var(--text-dim);font-size:15px;line-height:1.6}
 .doc-mode-intro h2{font-size:21px;font-weight:600;color:var(--text);margin:0 0 9px;letter-spacing:-.015em}
 .doc-mode-pair{font-size:13px;color:var(--text-faint);margin-top:13px}
@@ -468,6 +468,7 @@ input[type=range]{width:120px;accent-color:var(--them);flex:none}
     <div id="docStatus" class="note"></div>
     <div id="docPreview"></div>
     <button class="btn ghost" id="docDownload" type="button">Télécharger la traduction</button>
+    <button class="btn ghost" id="docDownloadText" type="button" style="display:none">Télécharger le texte traduit (.txt)</button>
     <button class="btn" id="docClose" type="button">Fermer</button>
   </div>
 </div>
@@ -2450,7 +2451,7 @@ const OCR_LANG = {
   en:"eng",zh:"chi_sim+eng",hi:"hin+eng",es:"spa+eng",fr:"fra+eng",
   ar:"ara+eng",bn:"ben+eng",ru:"rus+eng",pt:"por+eng",ur:"urd+eng",ja:"jpn+eng"
 };
-const docState = {lastBlob:null,lastBlobName:"",pages:[],worker:null,workerLang:"",busy:false};
+const docState = {lastBlob:null,lastBlobName:"",lastTextBlob:null,lastTextBlobName:"",pages:[],worker:null,workerLang:"",busy:false};
 const docScripts = {};
 function loadDocScript(key){
   const globals = {pdfjs:"pdfjsLib",jspdf:"jspdf",tesseract:"Tesseract",mammoth:"mammoth",docx:"docx",utif:"UTIF",heic2any:"heic2any",jszip:"JSZip"};
@@ -2482,6 +2483,7 @@ function openDocSheet(){
   $("docSelFrom").value=currentFrom; $("docSelTo").value=currentTo;
   $("docStatus").className="note"; $("docStatus").textContent=""; $("docPreview").innerHTML="";
   if(docState.lastBlob){$("docDownload").style.display="block";}else{$("docDownload").style.display="none";}
+  $("docDownloadText").style.display=docState.lastTextBlob?"block":"none";
   openSheet("docSheet");
 }
 
@@ -3378,6 +3380,9 @@ async function docProcessPdf(file){
   }
   const source=sourcePages.join("\n\n").trim(),translated=translatedPages.join("\n\n").trim();
   if(!source||!translated)throw new Error("Aucun texte lisible n'a été détecté dans le PDF.");
+  docState.lastTextBlob=new Blob([translated],{type:"text/plain;charset=utf-8"});
+  docState.lastTextBlobName=(file.name.replace(/\.[^.]+$/,"")||"document")+"_texte_traduit.txt";
+  $("docDownloadText").style.display="block";
   docAppendDocumentResult(source,translated,allHierarchy,allPairs,from,to);
   docAppendVisualPages("PDF",visualPages);
   try{docState.lastBlob=await docBuildVisualPdf(visualPages);}catch(e){console.warn("Export PDF visuel indisponible",e);docState.lastBlob=null;}
@@ -3451,7 +3456,9 @@ async function docProcessText(file){
 }
 
 async function handleDocFile(file){
-  if(!file||docState.busy)return;closeSheet("docSheet");docState.busy=true;$("docDownload").style.display="none";
+  if(!file||docState.busy)return;closeSheet("docSheet");docState.busy=true;
+  $("docDownload").style.display="none";$("docDownloadText").style.display="none";
+  docState.lastTextBlob=null;docState.lastTextBlobName="";
   if(S.mode!=="docs")setMode("docs");
   docAppendStatusNode(); docSetStatus("Préparation du fichier…");
   const ext=(file.name||"").toLowerCase().split(".").pop();
@@ -3466,6 +3473,7 @@ $("btnDocFile").onclick=()=>$("docFileInput").click();
 $("docCameraInput").onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)handleDocFile(f);e.target.value="";};
 $("docFileInput").onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)handleDocFile(f);e.target.value="";};
 $("docDownload").onclick=()=>{if(docState.lastBlob)docDownloadBlob(docState.lastBlob,docState.lastBlobName);};
+$("docDownloadText").onclick=()=>{if(docState.lastTextBlob)docDownloadBlob(docState.lastTextBlob,docState.lastTextBlobName);};
 $("docClose").onclick=()=>closeSheet("docSheet");
 
 function showBanner(html){
