@@ -51,6 +51,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
 #app{display:flex;flex-direction:column;height:100dvh;max-width:820px;margin:0 auto;
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+#app.docs-wide{max-width:1360px}
+#app.docs-wide #feed{padding-left:clamp(14px,3vw,42px);padding-right:clamp(14px,3vw,42px)}
 
 header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bottom:1px solid var(--line-soft);background:var(--bg);flex:none}
 #pairBtn{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;margin-left:-10px;flex:none}
@@ -176,6 +178,57 @@ header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bo
 .text-feed .turn.them .trans{font-size:24px;line-height:1.3}
 .text-feed .src{font-family:var(--font);font-size:14px;line-height:1.45;font-style:normal;color:var(--text-dim);margin-top:7px;padding-top:7px;opacity:1}
 
+/* Aperçus documentaires : comparaison visuelle sans modifier le contenu exporté. */
+.doc-layout-preview{align-self:center;width:100%;max-width:1240px;margin:4px 0 22px;min-width:0}
+.doc-layout-heading{display:flex;align-items:center;gap:8px;margin:2px 0 10px;color:var(--text-dim);font-size:12px;font-weight:600;letter-spacing:.045em;text-transform:uppercase}
+.doc-layout-heading::after{content:"";height:1px;flex:1;background:var(--line-soft)}
+.doc-layout-note{font-size:12px;color:var(--text-faint);line-height:1.45;margin:-2px 0 12px}
+.doc-preview-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.doc-preview-panel{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--bg-raise)}
+.doc-preview-label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:12px;font-weight:600;color:var(--text-dim)}
+.doc-preview-label strong{font-weight:650}
+.doc-preview-label .source-label{color:var(--them)}
+.doc-preview-label .translated-label{color:var(--me)}
+.doc-paper{min-width:0;min-height:140px;padding:clamp(15px,2.1vw,30px);background:#fff;color:#17242b;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;overflow-wrap:anywhere;word-break:normal}
+.doc-paper h1,.doc-paper h2,.doc-paper h3,.doc-paper h4{color:#14232a;line-height:1.2;margin:1.05em 0 .55em}
+.doc-paper h1{font-size:1.8em}.doc-paper h2{font-size:1.5em}.doc-paper h3{font-size:1.25em}.doc-paper h4{font-size:1.1em}
+.doc-paper p{margin:.45em 0 .8em;white-space:pre-wrap}
+.doc-paper ul,.doc-paper ol{padding-left:1.6em;margin:.5em 0 .9em}
+.doc-paper li{margin:.2em 0}
+.doc-paper blockquote{margin:1em 0;padding:.15em 0 .15em 1em;border-left:3px solid #9aabb2;color:#445761}
+.doc-paper table{border-collapse:collapse;width:100%;margin:1em 0;font-size:.92em;table-layout:fixed}
+.doc-paper th,.doc-paper td{border:1px solid #cbd5da;padding:6px 8px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.doc-paper th{background:#edf2f4;font-weight:650}
+.doc-paper img{display:block;max-width:100%;height:auto;margin:10px auto}
+.doc-paper hr{border:0;border-top:1px solid #d5dfe3;margin:1.2em 0}
+.doc-paper pre{max-width:100%;overflow:auto;padding:10px;background:#f1f4f5;border-radius:6px;white-space:pre-wrap}
+.doc-visual-pages{display:grid;gap:16px}
+.doc-visual-page{min-width:0}
+.doc-visual-page-title{font-size:11px;color:var(--text-faint);margin:0 0 7px}
+.doc-visual-page img{display:block;width:100%;height:auto;background:#fff;border-radius:8px}
+.doc-slide-paper{position:relative;width:100%;aspect-ratio:var(--slide-ratio,16/9);overflow:hidden;background:#fff;border:1px solid #d5dfe3;color:#17242b;container-type:inline-size}
+.doc-slide-shape{position:absolute;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.15}
+.doc-slide-paragraph{font-size:14px;font-size:calc(var(--ppt-font,14) * .1667cqw);line-height:1.18;margin:0 0 .28em;white-space:pre-wrap;overflow-wrap:anywhere}
+.doc-slide-shape ul,.doc-slide-shape ol{padding-left:1.1em;margin:0}
+.doc-slide-shape img{max-width:100%;height:auto}
+.doc-layout-preview .doc-chat-item{max-width:100%}
+@media (max-width:960px){
+  #app.docs-wide{max-width:100%}
+  .doc-preview-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .doc-preview-panel{max-width:100%}
+  .doc-paper{padding:clamp(14px,3vw,24px)}
+}
+@media (max-width:520px){
+  .doc-layout-preview{margin:0 0 16px}
+  .doc-layout-heading{font-size:11px}
+  .doc-preview-grid{gap:10px}
+  .doc-preview-label{padding:8px 10px}
+  .doc-paper{font-size:13px;padding:14px;line-height:1.5}
+  .doc-visual-pages{gap:12px}
+}
+@media (max-width:370px){
+  .doc-paper{font-size:12px;padding:11px}
+}
 /* Les documents sont affichés comme un seul message : une bulle d'original, une bulle de traduction. */
 .doc-chat-item{align-self:flex-start;display:flex;flex-direction:column;gap:6px;max-width:94%;width:100%}
 .doc-chat-item .tmeta{font-size:11px}
@@ -2374,6 +2427,7 @@ function renderControls(){
   $("mDocs").setAttribute("aria-pressed", String(S.mode === "docs"));
   feed.classList.toggle("text-feed", S.mode === "text");
   feed.classList.toggle("docs-feed", S.mode === "docs");
+  $("app").classList.toggle("docs-wide", isDocs);
 
   renderQuickbar();
   updateTextButtons();
@@ -2769,6 +2823,200 @@ function docRememberCopy(text){
   docCopyStore.set(id,String(text||""));
   return id;
 }
+
+function docInsertLayoutPreview(node){
+  const items=feed.querySelectorAll(".doc-chat-item");
+  if(items.length)feed.insertBefore(node,items[items.length-1]);
+  else feed.appendChild(node);
+  feed.scrollTop=feed.scrollHeight;
+}
+function docPreviewPanel(label,kind,content){
+  const panel=document.createElement("section");panel.className="doc-preview-panel";
+  const heading=document.createElement("div");heading.className="doc-preview-label";
+  const strong=document.createElement("strong");
+  strong.className=kind==="source"?"source-label":"translated-label";
+  strong.textContent=label;heading.appendChild(strong);panel.appendChild(heading);
+  const paper=document.createElement("div");paper.className="doc-paper";
+  if(content)paper.appendChild(content);
+  panel.appendChild(paper);return panel;
+}
+function docNewPreview(kind){
+  const root=document.createElement("section");root.className="doc-layout-preview";
+  const heading=document.createElement("div");heading.className="doc-layout-heading";
+  heading.textContent=kind+" — aperçu de la mise en page";root.appendChild(heading);return root;
+}
+function docAppendVisualPages(kind,pages){
+  if(!pages||!pages.length)return;
+  const root=docNewPreview(kind),grid=document.createElement("div");
+  grid.className="doc-visual-pages";
+  pages.forEach((page,index)=>{
+    const wrap=document.createElement("section");wrap.className="doc-visual-page";
+    const title=document.createElement("div");title.className="doc-visual-page-title";
+    title.textContent=(kind==="Photo"?"Image":"Page")+" "+(index+1)+" · comparaison originale / traduite";
+    wrap.appendChild(title);
+    const pair=document.createElement("div");pair.className="doc-preview-grid";
+    const source=document.createElement("img");source.alt="Page originale "+(index+1);source.loading="lazy";source.src=page.sourceUrl;
+    const translated=document.createElement("img");translated.alt="Page traduite "+(index+1);translated.loading="lazy";translated.src=page.translatedUrl;
+    pair.appendChild(docPreviewPanel("Original","source",source));
+    pair.appendChild(docPreviewPanel("Traduction","translated",translated));
+    wrap.appendChild(pair);grid.appendChild(wrap);
+  });
+  root.appendChild(grid);docInsertLayoutPreview(root);
+}
+function docSafeMammothHtml(markup){
+  const parsed=new DOMParser().parseFromString(String(markup||""),"text/html");
+  const allowed=new Set(["p","h1","h2","h3","h4","h5","h6","strong","b","em","i","u","s","del","sup","sub","ul","ol","li","blockquote","table","thead","tbody","tfoot","tr","td","th","br","hr","img","pre","code","div","span"]);
+  const copy=(node)=>{
+    if(node.nodeType===Node.TEXT_NODE)return document.createTextNode(node.nodeValue||"");
+    if(node.nodeType!==Node.ELEMENT_NODE)return document.createDocumentFragment();
+    const tag=node.tagName.toLowerCase(),frag=document.createDocumentFragment();
+    if(!allowed.has(tag)){Array.from(node.childNodes).forEach(child=>frag.appendChild(copy(child)));return frag;}
+    const out=document.createElement(tag);
+    if(tag==="img"){
+      const src=node.getAttribute("src")||"";
+      if(!/^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(src))return frag;
+      out.src=src;out.alt=node.getAttribute("alt")||"";
+    }
+    if(tag==="td"||tag==="th"){
+      ["colspan","rowspan"].forEach(name=>{
+        const value=parseInt(node.getAttribute(name)||"1",10);
+        if(Number.isInteger(value)&&value>0&&value<=12)out.setAttribute(name,String(value));
+      });
+    }
+    Array.from(node.childNodes).forEach(child=>out.appendChild(copy(child)));
+    return out;
+  };
+  const root=document.createElement("div");root.className="doc-word-content";
+  Array.from(parsed.body.childNodes).forEach(node=>root.appendChild(copy(node)));
+  return root;
+}
+async function docAppendWordPreview(sourceBuffer,translatedBuffer){
+  try{
+    await loadDocScript("mammoth");
+    const mammoth=window.mammoth;if(!mammoth||typeof mammoth.convertToHtml!=="function")return;
+    const results=await Promise.all([
+      mammoth.convertToHtml({arrayBuffer:sourceBuffer.slice(0)}),
+      mammoth.convertToHtml({arrayBuffer:translatedBuffer.slice(0)})
+    ]);
+    const root=docNewPreview("Word"),grid=document.createElement("div");grid.className="doc-preview-grid";
+    grid.appendChild(docPreviewPanel("Original","source",docSafeMammothHtml(results[0].value)));
+    grid.appendChild(docPreviewPanel("Traduction","translated",docSafeMammothHtml(results[1].value)));
+    root.appendChild(grid);
+    const note=document.createElement("div");note.className="doc-layout-note";
+    note.textContent="L'aperçu reprend les titres, paragraphes, listes, tableaux et images reconnus. Le fichier Word téléchargé conserve la mise en page et les éléments d'origine.";
+    root.appendChild(note);docInsertLayoutPreview(root);
+  }catch(e){console.warn("Aperçu Word indisponible",e);}
+}
+function docXmlColor(node){
+  if(!node)return "";
+  const rgb=node.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main","srgbClr")[0];
+  if(rgb&&/^[0-9a-f]{6}$/i.test(rgb.getAttribute("val")||""))return "#"+rgb.getAttribute("val");
+  return "";
+}
+function docPptxSlidePanel(xmlDoc,width,height){
+  const nsP="http://schemas.openxmlformats.org/presentationml/2006/main";
+  const nsA="http://schemas.openxmlformats.org/drawingml/2006/main";
+  const canvas=document.createElement("div");canvas.className="doc-slide-paper";
+  canvas.style.setProperty("--slide-ratio",width+"/"+height);
+  const bg=xmlDoc.getElementsByTagNameNS(nsP,"bg")[0];
+  const bgColor=docXmlColor(bg);if(bgColor)canvas.style.background=bgColor;
+  const shapes=Array.from(xmlDoc.getElementsByTagNameNS(nsP,"sp"));
+  shapes.forEach((shape,shapeIndex)=>{
+    const txBody=shape.getElementsByTagNameNS(nsP,"txBody")[0];
+    if(!txBody)return;
+    const paragraphs=Array.from(txBody.getElementsByTagNameNS(nsA,"p"));
+    const shapeText=paragraphs.map(p=>Array.from(p.getElementsByTagNameNS(nsA,"t")).map(t=>t.textContent||"").join("")).join("");
+    if(!shapeText.trim())return;
+    const shapePr=shape.getElementsByTagNameNS(nsP,"spPr")[0];
+    const xfrm=shapePr&&shapePr.getElementsByTagNameNS(nsA,"xfrm")[0];
+    const off=xfrm&&xfrm.getElementsByTagNameNS(nsA,"off")[0];
+    const ext=xfrm&&xfrm.getElementsByTagNameNS(nsA,"ext")[0];
+    const x=off?Number(off.getAttribute("x")):width*.05;
+    const y=off?Number(off.getAttribute("y")):height*(.04+shapeIndex*.04);
+    const cx=ext?Number(ext.getAttribute("cx")):width*.9;
+    const cy=ext?Number(ext.getAttribute("cy")):height*.12;
+    const box=document.createElement("div");box.className="doc-slide-shape";
+    box.style.left=(Math.max(0,x)/width*100)+"%";
+    box.style.top=(Math.max(0,y)/height*100)+"%";
+    box.style.width=(Math.max(1,cx)/width*100)+"%";
+    box.style.height=(Math.max(1,cy)/height*100)+"%";
+    const fill=docXmlColor(shapePr&&shapePr.getElementsByTagNameNS(nsA,"solidFill")[0]);
+    if(fill)box.style.background=fill;
+    const line=shapePr&&shapePr.getElementsByTagNameNS(nsA,"ln")[0];
+    const lineColor=docXmlColor(line&&line.getElementsByTagNameNS(nsA,"solidFill")[0]);
+    if(lineColor)box.style.border="1px solid "+lineColor;
+    const bodyPr=txBody.getElementsByTagNameNS(nsA,"bodyPr")[0];
+    if(bodyPr&&bodyPr.getAttribute("vert")==="vert")box.style.writingMode="vertical-rl";
+    paragraphs.forEach(p=>{
+      const text=Array.from(p.getElementsByTagNameNS(nsA,"t")).map(t=>t.textContent||"").join("");
+      if(!text&&!p.getElementsByTagNameNS(nsA,"br").length)return;
+      const para=document.createElement("div");para.className="doc-slide-paragraph";
+      const pPr=p.getElementsByTagNameNS(nsA,"pPr")[0];
+      const align=pPr&&pPr.getAttribute("algn");
+      if(align==="ctr")para.style.textAlign="center";
+      else if(align==="r")para.style.textAlign="right";
+      else if(align==="just")para.style.textAlign="justify";
+      if(pPr){
+        const bullet=pPr.getElementsByTagNameNS(nsA,"buChar")[0];
+        const auto=pPr.getElementsByTagNameNS(nsA,"buAutoNum")[0];
+        const level=parseInt(pPr.getAttribute("lvl")||"0",10);
+        if(bullet)para.textContent=(bullet.getAttribute("char")||"•")+" "+text;
+        else if(auto)para.textContent=(auto.getAttribute("type")==="arabicParenR"?"1) ":"1. ")+text;
+        else para.textContent=text;
+        if(level>0)para.style.marginLeft=(level*1.1)+"em";
+      }else para.textContent=text;
+      const run=p.getElementsByTagNameNS(nsA,"rPr")[0]||p.getElementsByTagNameNS(nsA,"defRPr")[0];
+      if(run){
+        const size=Number(run.getAttribute("sz"))/100;if(Number.isFinite(size)&&size>0)box.style.setProperty("--ppt-font",String(size));
+        if(run.getAttribute("b")==="1")para.style.fontWeight="700";
+        if(run.getAttribute("i")==="1")para.style.fontStyle="italic";
+        const color=docXmlColor(run.getElementsByTagNameNS(nsA,"solidFill")[0]);
+        if(color)para.style.color=color;
+        const underline=run.getAttribute("u");if(underline&&underline!=="none")para.style.textDecoration="underline";
+      }
+      box.appendChild(para);
+    });
+    canvas.appendChild(box);
+  });
+  return canvas;
+}
+function docAppendPptxPreview(slides,width,height){
+  if(!slides||!slides.length)return;
+  const root=docNewPreview("PowerPoint"),stack=document.createElement("div");stack.className="doc-visual-pages";
+  slides.forEach((slide,index)=>{
+    const source=docPptxSlidePanel(slide.sourceXmlDoc,width,height);
+    const translated=docPptxSlidePanel(slide.xmlDoc,width,height);
+    const wrap=document.createElement("section");wrap.className="doc-visual-page";
+    const title=document.createElement("div");title.className="doc-visual-page-title";title.textContent="Diapositive "+(index+1);
+    wrap.appendChild(title);
+    const grid=document.createElement("div");grid.className="doc-preview-grid";
+    grid.appendChild(docPreviewPanel("Original","source",source));
+    grid.appendChild(docPreviewPanel("Traduction","translated",translated));
+    wrap.appendChild(grid);stack.appendChild(wrap);
+  });
+  root.appendChild(stack);
+  const note=document.createElement("div");note.className="doc-layout-note";
+  note.textContent="L'aperçu restitue le positionnement des blocs de texte. Le PowerPoint téléchargé conserve les formes, images, couleurs, thèmes et la disposition complète du fichier d'origine.";
+  root.appendChild(note);docInsertLayoutPreview(root);
+}
+function docAppendPlainPreview(result,kind){
+  if(!result||!result.sourceBlocks||!result.sourceBlocks.length)return;
+  const make=(texts,hierarchy)=>{
+    const root=document.createElement("div");
+    texts.forEach((text,index)=>{
+      const tag=(hierarchy[index]||"").match(/^doc-h([1-3])$/);
+      let node=document.createElement(tag?"h"+tag[1]:"p");
+      if(!tag&&hierarchy[index]==="doc-quote")node=document.createElement("blockquote");
+      node.textContent=text;root.appendChild(node);
+    });
+    return root;
+  };
+  const root=docNewPreview(kind),grid=document.createElement("div");grid.className="doc-preview-grid";
+  grid.appendChild(docPreviewPanel("Original","source",make(result.sourceBlocks,result.hierarchy)));
+  grid.appendChild(docPreviewPanel("Traduction","translated",make(result.translatedBlocks,result.hierarchy)));
+  root.appendChild(grid);docInsertLayoutPreview(root);
+}
+
 function docSentenceParts(text,langKey){
   const source=String(text||"").trim();if(!source)return[];
   try{
@@ -2877,36 +3125,63 @@ function docAppendDocumentResult(source,translated,hierarchy,pairs,from,to){
   trBubble.appendChild(tr);trBubble.appendChild(trCopy);
   node.appendChild(sourceBubble);node.appendChild(trBubble);feed.appendChild(node);feed.scrollTop=feed.scrollHeight;
 }
-function docNativePdfText(items){
-  const rows=[];
+function docNativePdfText(items,viewport){
+  const fragments=[],scale=viewport&&viewport.scale?viewport.scale:1;
   for(const item of (items||[])){
     const text=docNormalizeTextOnly(String(item.str||""));
     if(!docLikelyText(text))continue;
     const transform=item.transform||[],x=Number(transform[4])||0,y=Number(transform[5])||0;
-    const fontSize=Math.max(1,Math.abs(Number(transform[0])||0),Math.abs(Number(transform[3])||0),Number(item.height)||0);
-    let row=rows.find(r=>Math.abs(r.y-y)<=Math.max(2,fontSize*.32));
-    if(!row){row={y,x0:x,fontSize,runs:[]};rows.push(row);}
-    row.x0=Math.min(row.x0,x);row.fontSize=Math.max(row.fontSize,fontSize);row.runs.push({x,text});
+    const point=viewport&&viewport.convertToViewportPoint?viewport.convertToViewportPoint(x,y):[x,-y];
+    const fontSize=Math.max(1,Math.hypot(Number(transform[0])||0,Number(transform[1])||0)*scale,Number(item.height||0)*scale);
+    const width=Math.max(fontSize*.35,Math.abs(Number(item.width)||0)*scale);
+    const height=Math.max(fontSize*.8,Number(item.height||0)*scale);
+    const bbox={x0:Math.max(0,point[0]),y0:Math.max(0,point[1]-height),x1:Math.max(0,point[0]+width),y1:Math.max(0,point[1]+height*.22)};
+    fragments.push({text,x:bbox.x0,baseline:point[1],fontSize,bbox,hasEOL:!!item.hasEOL});
   }
-  rows.sort((a,b)=>b.y-a.y);
-  const sizes=rows.map(r=>r.fontSize).sort((a,b)=>a-b),median=sizes.length?sizes[Math.floor(sizes.length/2)]:0;
-  const lines=rows.map(row=>({
-    text:row.runs.sort((a,b)=>a.x-b.x).map(r=>r.text).join(" ").replace(/\s+/g," ").trim(),
-    y:row.y,x0:row.x0,fontSize:row.fontSize
-  })).filter(x=>docLikelyText(x.text));
+  fragments.sort((a,b)=>a.baseline-b.baseline||a.x-b.x);
+  const rows=[];
+  fragments.forEach(fragment=>{
+    let row=rows.find(r=>Math.abs(r.baseline-fragment.baseline)<=Math.max(3,Math.min(r.fontSize,fragment.fontSize)*.4));
+    if(!row){row={baseline:fragment.baseline,fragments:[],fontSize:fragment.fontSize};rows.push(row);}
+    row.fragments.push(fragment);row.fontSize=Math.max(row.fontSize,fragment.fontSize);
+  });
+  const lines=[];
+  rows.forEach(row=>{
+    row.fragments.sort((a,b)=>a.x-b.x);
+    let current=null;
+    row.fragments.forEach(fragment=>{
+      const previous=current&&current.fragments[current.fragments.length-1];
+      const gap=previous?fragment.bbox.x0-previous.bbox.x1:0;
+      const split=current&&(gap>Math.max(34,row.fontSize*4.2)||previous.hasEOL);
+      if(!current||split){
+        current={text:fragment.text,bbox:{...fragment.bbox},fontSize:fragment.fontSize,x0:fragment.x,fragments:[fragment]};
+        lines.push(current);
+      }else{
+        current.text+=(gap>Math.max(2,row.fontSize*.16)?" ":"")+fragment.text;
+        current.bbox=docUnionBBox(current.bbox,fragment.bbox);
+        current.fontSize=Math.max(current.fontSize,fragment.fontSize);
+        current.fragments.push(fragment);
+      }
+    });
+  });
+  lines.sort((a,b)=>a.bbox.y0-b.bbox.y0||a.bbox.x0-b.bbox.x0);
+  const sizes=lines.map(line=>line.fontSize).sort((a,b)=>a-b),median=sizes.length?sizes[Math.floor(sizes.length/2)]:0;
   const blocks=[];
   for(const line of lines){
     const previous=blocks[blocks.length-1];
-    const gap=previous?previous.lastY-line.y:Infinity;
-    const aligned=previous&&Math.abs(previous.x0-line.x0)<=Math.max(8,line.fontSize*1.15);
-    const sameSize=previous&&Math.abs(previous.fontSize-line.fontSize)<=Math.max(2,previous.fontSize*.25);
-    if(previous&&gap>=0&&gap<=Math.max(8,line.fontSize*1.75)&&aligned&&sameSize){
-      previous.text=(previous.text+" "+line.text).replace(/\s+/g," ").trim();previous.lastY=line.y;
+    const gap=previous?line.bbox.y0-previous.bbox.y1:Infinity;
+    const aligned=previous&&Math.abs(previous.bbox.x0-line.bbox.x0)<=Math.max(12,line.fontSize*1.35);
+    const sameSize=previous&&Math.abs(previous.fontSize-line.fontSize)<=Math.max(2,line.fontSize*.25);
+    if(previous&&gap>=-line.fontSize*.25&&gap<=Math.max(7,line.fontSize*1.55)&&aligned&&sameSize){
+      previous.text=(previous.text+" "+line.text).replace(/\s+/g," ").trim();
+      previous.bbox=docUnionBBox(previous.bbox,line.bbox);
+      previous.fontSize=Math.max(previous.fontSize,line.fontSize);
     }else{
-      blocks.push({text:line.text,y:line.y,lastY:line.y,x0:line.x0,fontSize:line.fontSize});
+      blocks.push({text:line.text,bbox:{...line.bbox},fontSize:line.fontSize});
     }
   }
-  return blocks.map(block=>({text:block.text,fontSize:block.fontSize,hierarchy:docHierarchyClass(block.text,block.fontSize,median)}));
+  return blocks.map(block=>({text:block.text,bbox:block.bbox,fontSize:block.fontSize,
+    hierarchy:docHierarchyClass(block.text,block.fontSize,median)}));
 }
 
 function docExtractDocxBlocks(xmlDoc){
@@ -3013,7 +3288,24 @@ function docWriteXmlText(nodes,text){
 async function docRenderPdfPage(pdf,n){
   const page=await pdf.getPage(n),base=page.getViewport({scale:1.5}),scale=Math.min(1.7,2200/base.width),viewport=page.getViewport({scale});
   const canvas=document.createElement("canvas");canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
-  await page.render({canvasContext:canvas.getContext("2d"),viewport}).promise;return canvas;
+  await page.render({canvasContext:canvas.getContext("2d"),viewport}).promise;
+  const pageSize=page.getViewport({scale:1});
+  return {canvas,viewport,width:pageSize.width,height:pageSize.height};
+}
+async function docBuildVisualPdf(pages){
+  if(!pages||!pages.length)return null;
+  await loadDocScript("jspdf");
+  const jsPDF=window.jspdf&&window.jspdf.jsPDF?window.jspdf.jsPDF:null;
+  if(!jsPDF)return null;
+  const first=pages[0],doc=new jsPDF({
+    orientation:first.width>=first.height?"landscape":"portrait",
+    unit:"pt",format:[first.width,first.height],compress:true
+  });
+  pages.forEach((page,index)=>{
+    if(index)doc.addPage([page.width,page.height],page.width>=page.height?"landscape":"portrait");
+    doc.addImage(page.translatedUrl,"JPEG",0,0,page.width,page.height,undefined,"FAST");
+  });
+  return doc.output("blob");
 }
 async function docBuildTranslatedPdf(pageBlocks){
   const allText=(pageBlocks||[]).flat().map(block=>String(block.text||"")).join(" ");
@@ -3043,34 +3335,60 @@ async function docProcessImage(file){
   const {from,to}=docPair(),canvas=await docDecodeImage(file),worker=await getDocWorker(from);
   docSetStatus("Analyse du texte de l'image…");const best=await docRecognizeCanvas(canvas,worker),items=best.items;
   if(!items.length)throw new Error("Aucun texte lisible n'a été détecté dans l'image.");
+  const originalCanvas=document.createElement("canvas");originalCanvas.width=canvas.width;originalCanvas.height=canvas.height;
+  originalCanvas.getContext("2d").drawImage(canvas,0,0);
   const translated=[],pairedGroups=[];
   for(let i=0;i<items.length;i++){docSetStatus("Traduction de l'image — "+(i+1)+" / "+items.length+" groupes…");const result=await translateDocTextStructured(items[i].text,from,to);translated.push(result.text);pairedGroups.push(result.pairs);}
   docAppendImageResult(file,items,translated,pairedGroups,from,to);docDrawOverlay(canvas,items,translated,to);
+  docAppendVisualPages("Photo",[{
+    sourceUrl:originalCanvas.toDataURL("image/jpeg",.9),
+    translatedUrl:canvas.toDataURL("image/jpeg",.92)
+  }]);
   docState.lastBlob=await new Promise(r=>canvas.toBlob(r,"image/png",.96));docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"image")+"_traduit.png";
   $("docDownload").textContent="Télécharger l'image traduite";$("docDownload").style.display="block";docSetStatus("Traduction terminée.","good");
 }
 async function docProcessPdf(file){
   await loadDocScript("pdfjs");pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,{from,to}=docPair();
-  const sourcePages=[],translatedPages=[],pageBlocks=[],allPairs=[],allHierarchy=[];let groupOffset=0;
+  const sourcePages=[],translatedPages=[],pageBlocks=[],allPairs=[],allHierarchy=[],visualPages=[];let groupOffset=0;
   for(let n=1;n<=pdf.numPages;n++){
     docSetStatus("PDF — lecture de la page "+n+" / "+pdf.numPages+"…");
-    const page=await pdf.getPage(n),content=await page.getTextContent();let blocks=docNativePdfText(content.items||[]);
-    if(!blocks.length){const canvas=await docRenderPdfPage(pdf,n),worker=await getDocWorker(from),best=await docRecognizeCanvas(canvas,worker);blocks=best.items.map(x=>({text:x.text,metric:x.bbox?Math.max(1,x.bbox.y1-x.bbox.y0):0,hierarchy:""})).filter(x=>docLikelyText(x.text));}
-    if(!blocks.length){pageBlocks.push([]);continue;}
+    const page=await pdf.getPage(n),content=await page.getTextContent(),rendered=await docRenderPdfPage(pdf,n);
+    const canvas=rendered.canvas;
+    let blocks=docNativePdfText(content.items||[],rendered.viewport);
+    if(!blocks.length){
+      const worker=await getDocWorker(from),best=await docRecognizeCanvas(canvas,worker);
+      blocks=best.items.map(x=>({text:x.text,bbox:x.bbox,fontSize:x.bbox?Math.max(1,x.bbox.y1-x.bbox.y0):0,hierarchy:""})).filter(x=>docLikelyText(x.text));
+    }
+    const originalUrl=canvas.toDataURL("image/jpeg",.9);
+    if(!blocks.length){
+      pageBlocks.push([]);
+      visualPages.push({sourceUrl:originalUrl,translatedUrl:originalUrl,width:rendered.width,height:rendered.height});
+      continue;
+    }
     const result=await docTranslateBlocks(blocks,from,to,(a,b)=>docSetStatus("PDF — page "+n+" / "+pdf.numPages+", bloc "+a+" / "+b+"…"));
-    sourcePages.push(result.source);translatedPages.push(result.translated);pageBlocks.push(result.translatedBlocks.map((text,i)=>({text,hierarchy:result.hierarchy[i]})));
-    result.pairs.forEach(p=>allPairs.push({...p,groupIndex:groupOffset+p.groupIndex}));result.hierarchy.forEach(x=>allHierarchy.push(x));groupOffset+=result.hierarchy.length;
+    sourcePages.push(result.source);translatedPages.push(result.translated);
+    pageBlocks.push(result.translatedBlocks.map((text,i)=>({text,hierarchy:result.hierarchy[i]})));
+    result.pairs.forEach(p=>allPairs.push({...p,groupIndex:groupOffset+p.groupIndex}));
+    result.hierarchy.forEach(x=>allHierarchy.push(x));groupOffset+=result.hierarchy.length;
+    const overlayItems=blocks.map((block,index)=>({...block,text:result.translatedBlocks[index]||block.text}));
+    docDrawOverlay(canvas,overlayItems,overlayItems.map(x=>x.text),to);
+    const translatedUrl=canvas.toDataURL("image/jpeg",.92);
+    visualPages.push({sourceUrl:originalUrl,translatedUrl,width:rendered.width,height:rendered.height});
   }
   const source=sourcePages.join("\n\n").trim(),translated=translatedPages.join("\n\n").trim();
   if(!source||!translated)throw new Error("Aucun texte lisible n'a été détecté dans le PDF.");
-  docAppendDocumentResult(source,translated,allHierarchy,allPairs,from,to);docState.lastBlob=await docBuildTranslatedPdf(pageBlocks);
+  docAppendDocumentResult(source,translated,allHierarchy,allPairs,from,to);
+  docAppendVisualPages("PDF",visualPages);
+  try{docState.lastBlob=await docBuildVisualPdf(visualPages);}catch(e){console.warn("Export PDF visuel indisponible",e);docState.lastBlob=null;}
+  if(!docState.lastBlob)docState.lastBlob=await docBuildTranslatedPdf(pageBlocks);
   if(docState.lastBlob){docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"document")+"_traduit.pdf";$("docDownload").textContent="Télécharger le PDF traduit";}
   else{docState.lastBlob=new Blob([translated],{type:"text/plain;charset=utf-8"});docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"document")+"_traduit.txt";$("docDownload").textContent="Télécharger le texte traduit";}
-  $("docDownload").style.display="block";docSetStatus("Traduction du PDF terminée.","good");
+  $("docDownload").style.display="block";docSetStatus("Traduction du PDF terminée — mise en page d'origine conservée.","good");
 }
 async function docProcessDocx(file){
-  await loadDocScript("jszip");const {from,to}=docPair(),zip=await JSZip.loadAsync(await file.arrayBuffer()),documentFile=zip.file("word/document.xml");
+  await loadDocScript("jszip");
+  const {from,to}=docPair(),sourceBuffer=await file.arrayBuffer(),zip=await JSZip.loadAsync(sourceBuffer),documentFile=zip.file("word/document.xml");
   if(!documentFile)throw new Error("Le fichier Word ne contient pas de document principal lisible.");
   const xmlDoc=new DOMParser().parseFromString(await documentFile.async("string"),"application/xml");
   if(xmlDoc.getElementsByTagName("parsererror").length)throw new Error("Le XML du document Word est endommagé.");
@@ -3083,14 +3401,23 @@ async function docProcessDocx(file){
     if(!docLikelyText(original))continue;if(blockIndex<result.translatedBlocks.length)docWriteXmlText(nodes,result.translatedBlocks[blockIndex]);blockIndex++;
   }
   zip.file("word/document.xml",new XMLSerializer().serializeToString(xmlDoc));
-  docState.lastBlob=await zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",compression:"DEFLATE",compressionOptions:{level:6}});
-  docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"document")+"_traduit.docx";$("docDownload").textContent="Télécharger le Word traduit";$("docDownload").style.display="block";docSetStatus("Traduction du document Word terminée.","good");
+  const translatedBuffer=await zip.generateAsync({type:"arraybuffer",compression:"DEFLATE",compressionOptions:{level:6}});
+  docState.lastBlob=new Blob([translatedBuffer],{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+  docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"document")+"_traduit.docx";
+  $("docDownload").textContent="Télécharger le Word traduit";$("docDownload").style.display="block";
+  await docAppendWordPreview(sourceBuffer,translatedBuffer);
+  docSetStatus("Traduction du document Word terminée — styles, tableaux et structure conservés.","good");
 }
 async function docProcessPptx(file){
   await loadDocScript("jszip");const {from,to}=docPair(),zip=await JSZip.loadAsync(await file.arrayBuffer());
   const slideNames=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/i.test(n)).sort((a,b)=>parseInt(a.match(/slide(\d+)\.xml/i)[1],10)-parseInt(b.match(/slide(\d+)\.xml/i)[1],10));
   const slideDocs=[],blocks=[];
-  for(const name of slideNames){const xmlDoc=new DOMParser().parseFromString(await zip.files[name].async("string"),"application/xml");if(xmlDoc.getElementsByTagName("parsererror").length)continue;const paragraphs=docExtractPptxBlocks(xmlDoc);slideDocs.push({name,xmlDoc});paragraphs.forEach(p=>blocks.push(p));}
+  for(const name of slideNames){
+    const xmlDoc=new DOMParser().parseFromString(await zip.files[name].async("string"),"application/xml");
+    if(xmlDoc.getElementsByTagName("parsererror").length)continue;
+    const sourceXmlDoc=xmlDoc.cloneNode(true),paragraphs=docExtractPptxBlocks(xmlDoc);
+    slideDocs.push({name,sourceXmlDoc,xmlDoc});paragraphs.forEach(p=>blocks.push(p));
+  }
   if(!blocks.length)throw new Error("Le fichier PowerPoint ne contient pas de texte exploitable.");
   docSetStatus("Traduction du PowerPoint…");const result=await docTranslateBlocks(blocks,from,to,(a,b)=>docSetStatus("Traduction PowerPoint — paragraphe "+a+" / "+b+"…"));
   docAppendDocumentResult(result.source,result.translated,result.hierarchy,result.pairs,from,to);
@@ -3100,7 +3427,17 @@ async function docProcessPptx(file){
     if(!docLikelyText(original))continue;if(translatedIndex<result.translatedBlocks.length)docWriteXmlText(nodes,result.translatedBlocks[translatedIndex]);translatedIndex++;
   }zip.file(slide.name,new XMLSerializer().serializeToString(slide.xmlDoc));}
   docState.lastBlob=await zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.presentationml.presentation",compression:"DEFLATE",compressionOptions:{level:6}});
-  docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"presentation")+"_traduit.pptx";$("docDownload").textContent="Télécharger le PowerPoint traduit";$("docDownload").style.display="block";docSetStatus("Traduction du PowerPoint terminée.","good");
+  docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"presentation")+"_traduit.pptx";
+  $("docDownload").textContent="Télécharger le PowerPoint traduit";$("docDownload").style.display="block";
+  const presentationFile=zip.file("ppt/presentation.xml");
+  if(presentationFile){
+    const presentationXml=new DOMParser().parseFromString(await presentationFile.async("string"),"application/xml");
+    const slideSize=presentationXml.getElementsByTagNameNS("http://schemas.openxmlformats.org/presentationml/2006/main","sldSz")[0];
+    const slideWidth=slideSize?Number(slideSize.getAttribute("cx")):9144000;
+    const slideHeight=slideSize?Number(slideSize.getAttribute("cy")):5143500;
+    docAppendPptxPreview(slideDocs,slideWidth,slideHeight);
+  }
+  docSetStatus("Traduction du PowerPoint terminée — structure des diapositives conservée.","good");
 }
 async function docProcessText(file){
   const {from,to}=docPair(),ext=(file.name||"").toLowerCase().split(".").pop(),raw=await file.text();
@@ -3108,6 +3445,7 @@ async function docProcessText(file){
   if(!blocks.length)throw new Error("Le fichier ne contient pas de texte exploitable.");
   docSetStatus("Traduction du fichier texte…");const result=await docTranslateBlocks(blocks,from,to,(a,b)=>docSetStatus("Traduction — paragraphe "+a+" / "+b+"…"));
   docAppendDocumentResult(result.source,result.translated,result.hierarchy,result.pairs,from,to);
+  docAppendPlainPreview(result,ext==="md"?"Markdown":"Texte");
   docState.lastBlob=new Blob([result.translated],{type:"text/plain;charset=utf-8"});docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"texte")+"_traduit.txt";
   $("docDownload").textContent="Télécharger le texte traduit";$("docDownload").style.display="block";docSetStatus("Traduction terminée.","good");
 }
