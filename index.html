@@ -17,7 +17,7 @@
 <title>SOPP Language</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme: dark light;
@@ -28,7 +28,7 @@
   --me:#F0B44A; --me-bg:#2B2113;
   --live:#F2604B; --ok:#6FCF97;
   --r:14px; --pad:16px;
-  --font:'Archivo','Hiragino Sans','Noto Sans JP','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans Devanagari','Nirmala UI',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font:'Archivo','Noto Sans Arabic','Noto Sans Bengali','Noto Nastaliq Urdu','Hiragino Sans','Noto Sans JP','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans Devanagari','Nirmala UI',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
@@ -76,6 +76,10 @@ header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bo
   #shareBtnDesktop{display:none}
   #shareBtnMobile{display:flex}
 }
+[lang^="ar"][dir="rtl"],[lang^="ur"][dir="rtl"]{font-family:"Noto Sans Arabic","Noto Nastaliq Urdu",var(--font);direction:rtl;unicode-bidi:plaintext;text-align:right}
+[lang^="ur"][dir="rtl"]{font-family:"Noto Nastaliq Urdu","Noto Sans Arabic",var(--font)}
+[lang^="bn"]{font-family:"Noto Sans Bengali",var(--font)}
+.trans[dir="rtl"],.src[dir="rtl"],.doc-original[dir="rtl"],.doc-translated[dir="rtl"],.bullet[dir="rtl"]{direction:rtl;unicode-bidi:plaintext;text-align:right}
 @media (max-width:520px){
   header{gap:6px}
   #pairBtn{gap:6px;padding:6px 7px;margin-left:-7px}
@@ -609,16 +613,24 @@ const BUILT_IN_RELAY_SECRET = "";
    1. CONSTANTES
    ========================================================= */
 const LANGS = {
-  en:{code:"EN",   label:"English — anglais",        bcp:"en-US", hint:"Neutral professional English."},
-  fr:{code:"FR",   label:"Français",                  bcp:"fr-FR", hint:"Français professionnel, vouvoiement par défaut."},
-  es:{code:"ES",   label:"Español — espagnol",        bcp:"es-ES", hint:"Neutral international Spanish, 'usted' by default in professional settings."},
-  zh:{code:"中文", label:"中文 — chinois mandarin",   bcp:"zh-CN", hint:"Write in Simplified Chinese characters. Never output pinyin."},
-  ja:{code:"日本語",label:"日本語 — japonais",         bcp:"ja-JP", hint:"Natural business Japanese, です/ます register by default. Never output romaji."},
-  hi:{code:"हिन्दी",label:"हिन्दी — hindi",            bcp:"hi-IN", hint:"Write in Devanagari script. Never output transliteration."}
+  en:{code:"EN",label:"English — anglais",bcp:"en-US",hint:"Neutral professional English."},
+  zh:{code:"中文",label:"中文 — chinois mandarin",bcp:"zh-CN",hint:"Write in Simplified Chinese characters. Never output pinyin."},
+  hi:{code:"हिन्दी",label:"हिन्दी — hindi",bcp:"hi-IN",hint:"Write in Devanagari script. Never output transliteration."},
+  es:{code:"ES",label:"Español — espagnol",bcp:"es-ES",hint:"Neutral international Spanish, 'usted' by default in professional settings."},
+  fr:{code:"FR",label:"Français",bcp:"fr-FR",hint:"Français professionnel, vouvoiement par défaut."},
+  ar:{code:"AR",label:"العربية — arabe",bcp:"ar-SA",live:"ar-EG",dir:"rtl",hint:"Write in clear Modern Standard Arabic using Arabic script. Preserve names, figures and technical terms. Do not transliterate into Latin characters."},
+  bn:{code:"BN",label:"বাংলা — bengali",bcp:"bn-BD",live:"bn-BD",hint:"Write in standard Bengali using Bengali script. Do not transliterate into Latin characters."},
+  ru:{code:"RU",label:"Русский — russe",bcp:"ru-RU",live:"ru-RU",hint:"Write in natural standard Russian using Cyrillic. Do not transliterate into Latin characters."},
+  pt:{code:"PT",label:"Português — portugais",bcp:"pt-BR",live:"pt-BR",hint:"Use natural professional Brazilian Portuguese by default. Preserve names, figures and technical terms."},
+  ur:{code:"UR",label:"اردو — ourdou",bcp:"ur-PK",live:false,dir:"rtl",hint:"Write in standard Urdu using the Urdu script from right to left. Never use Roman Urdu or Latin transliteration."},
+  ja:{code:"日本語",label:"日本語 — japonais",bcp:"ja-JP",hint:"Natural business Japanese, です/ます register by default. Never output romaji."}
 };
-const LANG_NAMES = {en:"English", fr:"French", es:"Spanish", zh:"Mandarin Chinese", ja:"Japanese", hi:"Hindi"};
+const LANG_NAMES = {
+  en:"English",zh:"Mandarin Chinese",hi:"Hindi",es:"Spanish",fr:"French",
+  ar:"Arabic",bn:"Bengali",ru:"Russian",pt:"Portuguese (Brazilian)",ur:"Urdu",ja:"Japanese"
+};
 /* caractères par seconde typiques à l'oral — sert à estimer le débit de la source */
-const CPS = {en:14, fr:15, es:15, zh:5.5, ja:7, hi:12};
+const CPS = {en:14,zh:5.5,hi:12,es:15,fr:15,ar:13,bn:14,ru:13,pt:15,ur:12,ja:7};
 
 const DOMAINS = {
   none: {label:"Aucun — langage courant", rule:""},
@@ -735,7 +747,7 @@ const PROVIDERS = {
   anthropic: {name:"Anthropic — clé payante",               short:"Anthropic",  llm:true,  cost:"payant"}
 };
 const PREF_ORDER = ["claude", "gemini", "anthropic", "chrome", "mymemory"];
-const MM_CODE = {en:"en", fr:"fr", es:"es", zh:"zh-CN", ja:"ja", hi:"hi"};
+const MM_CODE = {en:"en",zh:"zh-CN",hi:"hi",es:"es",fr:"fr",ar:"ar",bn:"bn",ru:"ru",pt:"pt",ur:"ur",ja:"ja"};
 
 let sampleFn = null, downloadsFn = null, capsChecked = false;
 
@@ -1398,7 +1410,7 @@ function internalSetupMessage(){
   const cfg = {
     responseModalities:["TEXT"],
     inputAudioTranscription:{
-      languageCodes:[LANGS[S.them].bcp],
+      languageCodes:[LANGS[S.them].live||LANGS[S.them].bcp],
       mode:"SMART"
     }
   };
@@ -1414,6 +1426,10 @@ function internalWsUrl(){
 
 async function startInternalListening(){
   if(internalListening){ stopInternalListening(); return; }
+  if(LANGS[S.them].live===false){
+    showBanner("<b>Transcription audio interne indisponible pour l’ourdou.</b> Gemini Live ne liste pas actuellement cette langue pour la transcription audio. Utilisez le bouton d’écoute du microphone, le mode Texte ou Documents.");
+    return;
+  }
   if(!S.geminiKey.trim() || S.geminiKey.trim().length <= 10){
     syncSettings();
     showBanner("<b>En interne demande une clé Google AI Studio.</b> Ajoutez-la dans Réglages › Traducteur › Gemini.");
@@ -1652,6 +1668,7 @@ function listeningLabel(){
 function setLive(txt){
   if(!$("live").classList.contains("show")) return;
   const el = $("liveTxt");
+  el.dir=LANGS[S.them].dir||"ltr";el.lang=LANGS[S.them].bcp;
   if(txt && txt.trim()){ el.innerHTML = "<span>" + esc(txt) + "</span>"; return; }
   if(internalListening) el.textContent = "Capture audio de l’appareil — transcription en " + LANGS[S.them].code + "…";
   else if(S.mode === "conf") el.textContent = "Notes en cours — " + S.confLog.length + " passage(s) captés";
@@ -2003,6 +2020,7 @@ async function runFullSummary(){
     const pre = document.createElement("div");
     pre.style.whiteSpace = "pre-wrap";
     pre.style.fontSize = "16px";
+    pre.dir=LANGS[S.me].dir||"ltr";pre.lang=LANGS[S.me].bcp;
     pre.textContent = cleanOut(res.text);
     node.appendChild(pre);
     S.summary = cleanOut(res.text);
@@ -2053,16 +2071,18 @@ function renderTurn(turn){
   if(!node) return;
   const from = LANGS[turn.from].code, to = LANGS[turn.to].code;
   let body;
+  const targetMeta=LANGS[turn.to],sourceMeta=LANGS[turn.from];
+  const targetDir=targetMeta.dir||"ltr",sourceDir=sourceMeta.dir||"ltr";
   if(turn.status === "error"){
-    body = (turn.trans ? '<div class="trans">' + esc(turn.trans) + "</div>" : "")
+    body = (turn.trans ? '<div class="trans" dir="'+targetDir+'" lang="'+targetMeta.bcp+'">' + esc(turn.trans) + "</div>" : "")
          + '<div class="err"><span>' + esc(turn.err) + "</span>"
          + (turn.retryable ? '<button data-retry="' + turn.id + '">Réessayer</button>' : "") + "</div>";
   } else if(!turn.trans){
-    body = '<div class="trans waiting">traduction…</div>';
+    body = '<div class="trans waiting" dir="'+targetDir+'" lang="'+targetMeta.bcp+'">traduction…</div>';
   } else {
-    body = '<div class="trans">' + esc(turn.trans) + "</div>";
+    body = '<div class="trans" dir="'+targetDir+'" lang="'+targetMeta.bcp+'">' + esc(turn.trans) + "</div>";
   }
-  const src = S.showSrc ? '<div class="src">' + esc(turn.src) + "</div>" : "";
+  const src = S.showSrc ? '<div class="src" dir="'+sourceDir+'" lang="'+sourceMeta.bcp+'">' + esc(turn.src) + "</div>" : "";
   const who = turn.side === "them" ? "Interlocuteur" : "Moi";
   const prov = (turn.provider && PROVIDERS[turn.provider]) ? '<span>' + esc(PROVIDERS[turn.provider].short) + "</span>" : "";
   const copy = turn.trans ? '<button type="button" class="bubble-copy" data-copy-turn="' + turn.id + '" aria-label="Copier la traduction" title="Copier la traduction">⧉</button>' : "";
@@ -2098,7 +2118,8 @@ function addBulletNode(b){
   n.className = "bullet copyable";
   n.id = "b-" + b.id;
   n.setAttribute("data-bullet", b.id);
-  const txt = document.createElement("span"); txt.textContent = b.text; n.appendChild(txt);
+  const txt = document.createElement("span");
+  txt.textContent=b.text;txt.dir=LANGS[S.me].dir||"ltr";txt.lang=LANGS[S.me].bcp;n.appendChild(txt);
   if(!b.err){
     const copy=document.createElement("button"); copy.type="button"; copy.className="bullet-copy"; copy.textContent="⧉"; copy.title="Copier"; copy.setAttribute("aria-label","Copier"); copy.dataset.copyBullet=b.id; n.appendChild(copy);
   }
@@ -2341,6 +2362,8 @@ function renderControls(){
 
   $("tLangThem").textContent = LANGS[S.them].code;
   $("tLangMe").textContent = LANGS[S.me].code;
+  $("taThem").dir=LANGS[S.them].dir||"ltr";$("taThem").lang=LANGS[S.them].bcp;
+  $("taMe").dir=LANGS[S.me].dir||"ltr";$("taMe").lang=LANGS[S.me].bcp;
 
   $("pairThem").textContent = LANGS[S.them].code;
   $("pairMe").textContent   = LANGS[S.me].code;
@@ -2369,7 +2392,10 @@ const DOC_LIB = {
   heic2any: "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js",
   jszip: "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
 };
-const OCR_LANG = {en:"eng", fr:"fra+eng", es:"spa+eng", zh:"chi_sim+eng", ja:"jpn+eng", hi:"hin+eng"};
+const OCR_LANG = {
+  en:"eng",zh:"chi_sim+eng",hi:"hin+eng",es:"spa+eng",fr:"fra+eng",
+  ar:"ara+eng",bn:"ben+eng",ru:"rus+eng",pt:"por+eng",ur:"urd+eng",ja:"jpn+eng"
+};
 const docState = {lastBlob:null,lastBlobName:"",pages:[],worker:null,workerLang:"",busy:false};
 const docScripts = {};
 function loadDocScript(key){
@@ -2716,15 +2742,16 @@ async function getDocWorker(langKey){
   }catch(e){}
   docState.workerLang=code; return docState.worker;
 }
-function docDrawOverlay(canvas,items,translated){
-  const ctx=canvas.getContext("2d");
+function docDrawOverlay(canvas,items,translated,langKey){
+  const ctx=canvas.getContext("2d"),rtl=!!(LANGS[langKey]&&LANGS[langKey].dir==="rtl");
   for(let i=0;i<items.length;i++){const it=items[i],tr=String(translated[i]||"").trim();if(!it||!it.bbox||!tr)continue;const b=it.bbox,x=Math.max(0,b.x0),y=Math.max(0,b.y0),w=Math.max(8,b.x1-b.x0),h=Math.max(10,b.y1-b.y0),pad=Math.max(4,h*.18),fs=clamp(Math.round(h*.55),13,42);
     ctx.save();ctx.fillStyle="rgba(255,255,255,.94)";ctx.fillRect(Math.max(0,x-pad),Math.max(0,y-pad),Math.min(canvas.width-x+pad,w+pad*2),Math.min(canvas.height-y+pad,h+pad*2));
-    ctx.fillStyle="#11181D";ctx.font="600 "+fs+"px Archivo,system-ui,sans-serif";ctx.textBaseline="middle";
+    const overlayFamily=langKey==="ur"?"'Noto Nastaliq Urdu',system-ui,sans-serif":langKey==="ar"?"'Noto Sans Arabic',system-ui,sans-serif":langKey==="bn"?"'Noto Sans Bengali',system-ui,sans-serif":"Archivo,system-ui,sans-serif";
+    ctx.fillStyle="#11181D";ctx.font="600 "+fs+"px "+overlayFamily;ctx.textBaseline="middle";ctx.direction=rtl?"rtl":"ltr";ctx.textAlign=rtl?"right":"left";
     const maxW=Math.max(20,Math.min(canvas.width-x-pad,Math.max(w*1.15,240))),words=tr.split(/\s+/);let line="",lines=[];
     for(const word of words){const test=line?line+" "+word:word;if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=word;}else line=test;}if(line)lines.push(line);
-    const lh=fs*1.15,boxH=Math.max(h+pad*2,lines.length*lh+pad*2);ctx.fillStyle="rgba(255,255,255,.94)";ctx.fillRect(Math.max(0,x-pad),Math.max(0,y-pad),Math.min(canvas.width-x+pad,Math.max(w+pad*2,maxW)),Math.min(canvas.height-y+pad,boxH));
-    ctx.fillStyle="#11181D";let ty=y+h/2-((lines.length-1)*lh)/2;for(const ln of lines){ctx.fillText(ln,x,ty);ty+=lh;}ctx.restore();
+    const lh=fs*1.15,boxH=Math.max(h+pad*2,lines.length*lh+pad*2),boxX=Math.max(0,x-pad),boxW=Math.min(canvas.width-boxX,Math.max(w+pad*2,maxW));ctx.fillStyle="rgba(255,255,255,.94)";ctx.fillRect(boxX,Math.max(0,y-pad),boxW,Math.min(canvas.height-y+pad,boxH));
+    ctx.fillStyle="#11181D";let ty=y+h/2-((lines.length-1)*lh)/2;const textX=rtl?boxX+boxW-pad:x;for(const ln of lines){ctx.fillText(ln,textX,ty);ty+=lh;}ctx.restore();
   }
 }
 function docAppendStatusNode(){
@@ -2751,7 +2778,7 @@ function docSentenceParts(text,langKey){
       if(out.length)return out;
     }
   }catch(e){}
-  return (source.match(/[^.!?…]+(?:[.!?…]+["”’»)\]]*)?/g)||[]).map(x=>x.trim()).filter(Boolean);
+  return (source.match(/[^.!?…؟۔]+(?:[.!?…؟۔]+["”’»)\]]*)?/g)||[]).map(x=>x.trim()).filter(Boolean);
 }
 function docHierarchyClass(text,metric,medianMetric){
   const t=String(text||"").trim();
@@ -2821,11 +2848,11 @@ function docAppendImageResult(file,items,translated,pairedGroups,from,to){
   meta.appendChild(strong);meta.appendChild(pair);node.appendChild(meta);
   const hierarchy=docImageHierarchy(validItems);
   const bubble=document.createElement("div");bubble.className="bubble doc-chat-bubble doc-source-bubble copyable";
-  const src=document.createElement("div");src.className="doc-original";src.innerHTML=docPairedMarkup(pairs,"source",uid,hierarchy);
+  const src=document.createElement("div");src.className="doc-original";src.dir=LANGS[from||S.them].dir||"ltr";src.lang=LANGS[from||S.them].bcp;src.innerHTML=docPairedMarkup(pairs,"source",uid,hierarchy);
   const copySource=document.createElement("button");copySource.type="button";copySource.className="bubble-copy";copySource.setAttribute("aria-label","Copier le texte original");copySource.title="Copier le texte original";copySource.textContent="⧉";copySource.dataset.copyDoc=docRememberCopy(source);
   bubble.appendChild(src);bubble.appendChild(copySource);node.appendChild(bubble);
   const trBubble=document.createElement("div");trBubble.className="bubble doc-chat-bubble doc-translation-bubble copyable";
-  const translatedNode=document.createElement("div");translatedNode.className="doc-translated";translatedNode.innerHTML=docPairedMarkup(pairs,"translated",uid,hierarchy);
+  const translatedNode=document.createElement("div");translatedNode.className="doc-translated";translatedNode.dir=LANGS[to||S.me].dir||"ltr";translatedNode.lang=LANGS[to||S.me].bcp;translatedNode.innerHTML=docPairedMarkup(pairs,"translated",uid,hierarchy);
   const copy=document.createElement("button");copy.type="button";copy.className="bubble-copy";copy.setAttribute("aria-label","Copier la traduction");copy.title="Copier la traduction";copy.textContent="⧉";copy.dataset.copyDoc=docRememberCopy(tr);
   trBubble.appendChild(translatedNode);trBubble.appendChild(copy);node.appendChild(trBubble);feed.appendChild(node);feed.scrollTop=feed.scrollHeight;
 }
@@ -2841,11 +2868,11 @@ function docAppendDocumentResult(source,translated,hierarchy,pairs,from,to){
   const uid="doc"+now()+"d"+(feed.querySelectorAll(".doc-chat-item").length+1);
   const effectivePairs=pairs&&pairs.length?pairs:[{source:cleanSource,translated:cleanTranslated,paragraphIndex:0}];
   const sourceBubble=document.createElement("div");sourceBubble.className="bubble doc-chat-bubble doc-source-bubble copyable";
-  const src=document.createElement("div");src.className="doc-original";src.innerHTML=docPairedMarkup(effectivePairs,"source",uid,hierarchy||docGeneralHierarchy(cleanSource));
+  const src=document.createElement("div");src.className="doc-original";src.dir=LANGS[from||S.them].dir||"ltr";src.lang=LANGS[from||S.them].bcp;src.innerHTML=docPairedMarkup(effectivePairs,"source",uid,hierarchy||docGeneralHierarchy(cleanSource));
   const srcCopy=document.createElement("button");srcCopy.type="button";srcCopy.className="bubble-copy";srcCopy.setAttribute("aria-label","Copier le texte original");srcCopy.title="Copier le texte original";srcCopy.textContent="⧉";srcCopy.dataset.copyDoc=docRememberCopy(cleanSource);
   sourceBubble.appendChild(src);sourceBubble.appendChild(srcCopy);
   const trBubble=document.createElement("div");trBubble.className="bubble doc-chat-bubble doc-translation-bubble copyable";
-  const tr=document.createElement("div");tr.className="doc-translated";tr.innerHTML=docPairedMarkup(effectivePairs,"translated",uid,hierarchy||docGeneralHierarchy(cleanSource));
+  const tr=document.createElement("div");tr.className="doc-translated";tr.dir=LANGS[to||S.me].dir||"ltr";tr.lang=LANGS[to||S.me].bcp;tr.innerHTML=docPairedMarkup(effectivePairs,"translated",uid,hierarchy||docGeneralHierarchy(cleanSource));
   const trCopy=document.createElement("button");trCopy.type="button";trCopy.className="bubble-copy";trCopy.setAttribute("aria-label","Copier la traduction");trCopy.title="Copier la traduction";trCopy.textContent="⧉";trCopy.dataset.copyDoc=docRememberCopy(cleanTranslated);
   trBubble.appendChild(tr);trBubble.appendChild(trCopy);
   node.appendChild(sourceBubble);node.appendChild(trBubble);feed.appendChild(node);feed.scrollTop=feed.scrollHeight;
@@ -2989,6 +3016,10 @@ async function docRenderPdfPage(pdf,n){
   await page.render({canvasContext:canvas.getContext("2d"),viewport}).promise;return canvas;
 }
 async function docBuildTranslatedPdf(pageBlocks){
+  const allText=(pageBlocks||[]).flat().map(block=>String(block.text||"")).join(" ");
+  // The bundled jsPDF core font is not a Unicode font. Preserve non-Latin text by
+  // letting the caller fall back to a UTF-8 text file instead of exporting tofu.
+  if(/[^\u0000-\u024F]/.test(allText))return null;
   await loadDocScript("jspdf");
   const jsPDF=window.jspdf&&window.jspdf.jsPDF?window.jspdf.jsPDF:null;
   if(!jsPDF)return null;
@@ -3014,7 +3045,7 @@ async function docProcessImage(file){
   if(!items.length)throw new Error("Aucun texte lisible n'a été détecté dans l'image.");
   const translated=[],pairedGroups=[];
   for(let i=0;i<items.length;i++){docSetStatus("Traduction de l'image — "+(i+1)+" / "+items.length+" groupes…");const result=await translateDocTextStructured(items[i].text,from,to);translated.push(result.text);pairedGroups.push(result.pairs);}
-  docAppendImageResult(file,items,translated,pairedGroups,from,to);docDrawOverlay(canvas,items,translated);
+  docAppendImageResult(file,items,translated,pairedGroups,from,to);docDrawOverlay(canvas,items,translated,to);
   docState.lastBlob=await new Promise(r=>canvas.toBlob(r,"image/png",.96));docState.lastBlobName=(file.name.replace(/\.[^.]+$/,"")||"image")+"_traduit.png";
   $("docDownload").textContent="Télécharger l'image traduite";$("docDownload").style.display="block";docSetStatus("Traduction terminée.","good");
 }

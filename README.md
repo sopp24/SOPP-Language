@@ -1,8 +1,10 @@
 # Interprète
 
-Traduction orale en temps réel, dans les deux sens, entre **français, anglais, espagnol, chinois mandarin, japonais et hindi**.
+Traduction orale en temps réel, dans les deux sens, entre **anglais, chinois mandarin, hindi, espagnol, français, arabe, bengali, russe, portugais, ourdou et japonais**.
 
 Une seule page web. Rien à installer, rien à compiler, aucun serveur. Elle tourne sur téléphone comme sur ordinateur, et une fois hébergée quelque part, le lien est à vous pour aussi longtemps que vous gardez le dépôt.
+
+Les onze langues sont proposées dans les sélecteurs et pour la traduction des textes et documents. La reconnaissance vocale et les voix de synthèse dépendent des langues effectivement prises en charge par le navigateur et installées sur l'appareil. Le traducteur intégré à Chrome ne propose pas toutes les paires : le secours automatique utilise alors un autre moteur. La capture audio interne Gemini Live ne prend pas actuellement en charge l'ourdou ; l'écoute classique par microphone reste disponible selon le navigateur.
 
 ---
 
@@ -246,7 +248,7 @@ Les deux zones de saisie permettent d'écrire soit dans la langue de l'interlocu
 Les commandes fixes en bas de l'écran permettent de prendre une photo ou de choisir un fichier. Le texte est extrait dans le navigateur, puis traduit avec le moteur sélectionné dans les réglages.
 
 - **Photos et images** : l'OCR reconnaît les paragraphes ou groupes de texte. L'original apparaît en bleu et la traduction en jaune. Une phrase sélectionnée est mise en évidence dans les deux bulles.
-- **PDF** : le texte sélectionnable est extrait directement ; les pages scannées passent par l'OCR. La discussion présente le texte original puis la traduction. Le PDF téléchargé est un document textuel traduit, sans les illustrations de l'original.
+- **PDF** : le texte sélectionnable est extrait directement ; les pages scannées passent par l'OCR. La discussion présente le texte original puis la traduction. Le PDF téléchargé est un document textuel traduit, sans les illustrations de l'original. Pour les écritures non latines que la police PDF intégrée ne sait pas représenter, le téléchargement bascule vers un fichier TXT UTF-8 afin de ne pas perdre les caractères.
 - **Word DOCX et PowerPoint PPTX** : le texte des paragraphes et diapositives est remplacé dans une copie du fichier, ce qui conserve la structure et les éléments graphiques du document.
 - **Fichiers TXT, Markdown et RTF** : les balises et commandes de mise en forme sont retirées avant traduction ; le résultat est téléchargeable en TXT.
 
@@ -258,7 +260,7 @@ Le bouton de langue dans l'en-tête ouvre les langues du document lorsque cet on
 
 ## 5. Installer les voix de synthèse manquantes
 
-L'appli utilise les voix du système. Le chinois, le japonais et l'hindi ne sont presque jamais installés par défaut sur un appareil français. L'écran **Langues** vous dit lesquelles manquent.
+L'appli utilise les voix du système. Les voix pour le chinois, le japonais, l'hindi, l'arabe, le bengali et l'ourdou ne sont pas toujours installées par défaut sur un appareil français. L'écran **Langues** vous dit lesquelles manquent.
 
 **iPhone / iPad**
 Réglages → Accessibilité → **Lire et énoncer** (ce menu s'appelait *Contenu énoncé* avant iOS 26) → **Voix** → choisissez la langue → touchez l'icône de nuage à côté d'une voix pour la télécharger. Prenez la version *Amélioré* ou *Premium* quand elle existe : la différence est nette. Comptez 100 à 400 Mo par voix, en wifi.
