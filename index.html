@@ -208,7 +208,7 @@ header{display:flex;align-items:center;gap:10px;padding:9px var(--pad);border-bo
 .doc-visual-page img{display:block;width:100%;height:auto;background:#fff;border-radius:8px}
 .doc-slide-paper{position:relative;width:100%;aspect-ratio:var(--slide-ratio,16/9);overflow:hidden;background:#fff;border:1px solid #d5dfe3;color:#17242b;container-type:inline-size}
 .doc-slide-shape{position:absolute;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.15}
-.doc-slide-paragraph{font-size:14px;font-size:calc(var(--ppt-font,14) * .1667cqw);line-height:1.18;margin:0 0 .28em;white-space:pre-wrap;overflow-wrap:anywhere}
+.doc-slide-paragraph{font-size:14px;font-size:var(--ppt-font-size,2.3cqw);line-height:1.18;margin:0 0 .28em;white-space:pre-wrap;overflow-wrap:anywhere}
 .doc-slide-shape ul,.doc-slide-shape ol{padding-left:1.1em;margin:0}
 .doc-slide-shape img{max-width:100%;height:auto}
 .doc-layout-preview .doc-chat-item{max-width:100%}
@@ -2969,7 +2969,7 @@ function docPptxSlidePanel(xmlDoc,width,height){
       }else para.textContent=text;
       const run=p.getElementsByTagNameNS(nsA,"rPr")[0]||p.getElementsByTagNameNS(nsA,"defRPr")[0];
       if(run){
-        const size=Number(run.getAttribute("sz"))/100;if(Number.isFinite(size)&&size>0)box.style.setProperty("--ppt-font",String(size));
+        const size=Number(run.getAttribute("sz"))/100;if(Number.isFinite(size)&&size>0)para.style.setProperty("--ppt-font-size",Math.max(1.2,Math.min(8,size*.1667))+"cqw");
         if(run.getAttribute("b")==="1")para.style.fontWeight="700";
         if(run.getAttribute("i")==="1")para.style.fontStyle="italic";
         const color=docXmlColor(run.getElementsByTagNameNS(nsA,"solidFill")[0]);
